@@ -59,7 +59,7 @@ class PieceDetectionNode(Node):
         self.publisher.publish(out_msg)
 
         if len(detections) > 0:
-         self.get_logger().info(f'{len(detections)} piezas')
+                self.get_logger().info(f'{len(detections)} piezas')
 
         if self.show_debug:
             cv2.imshow('Deteccion de piezas', annotated)
@@ -67,13 +67,17 @@ class PieceDetectionNode(Node):
             cv2.waitKey(1)
 
     def detect_pieces(self, frame: np.ndarray):
-        vis = frame.copy()
+        y1, y2 = 60, 430
+        x1, x2 = 120, 520
+        roi = frame[y1:y2, x1:x2]
+        vis = roi.copy()
 
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        blur = cv2.GaussianBlur(gray, (5, 5), 0)
+        hsv = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
+        lower = np.array([0, 0, 0])
+        upper = np.array([180, 255, 90])
+        mask = cv2.inRange(hsv, lower, upper)
 
-        thresh_type = cv2.THRESH_BINARY_INV if self.binary_inverted else cv2.THRESH_BINARY
-        _, mask = cv2.threshold(blur, 0, 255, thresh_type + cv2.THRESH_OTSU)
+        mask = cv2.medianBlur(mask, 5)
 
         kernel = np.ones((5, 5), np.uint8)
         mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
@@ -82,22 +86,41 @@ class PieceDetectionNode(Node):
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         detections = []
+        roi_h, roi_w = roi.shape[:2]
+        roi_area = roi_h * roi_w
 
         for cnt in contours:
             area = cv2.contourArea(cnt)
+
             if area < self.min_area:
                 continue
 
+            if area > 0.25 * roi_area:
+                continue
+
             x, y, w, h = cv2.boundingRect(cnt)
+
+            margin = 8
+            if x <= margin or y <= margin or (x + w) >= (roi_w - margin) or (y + h) >= (roi_h - margin):
+                continue
+
+            aspect_ratio = w / float(h)
+            if aspect_ratio < 0.7 or aspect_ratio > 1.3:
+                continue
+
+            rect_fill = area / float(w * h)
+            if rect_fill < 0.5:
+                continue
+                
             cx = x + w // 2
             cy = y + h // 2
 
             rect = cv2.minAreaRect(cnt)
-            (rx, ry), (rw, rh), angle = rect
+            (_, _), (rw, rh), angle = rect
 
             angle_deg = float(angle)
             if rw < rh:
-                angle_deg = angle_deg + 90.0
+                angle_deg += 90.0
 
             size_class = self.classify_piece(w, h, area)
 
@@ -108,19 +131,29 @@ class PieceDetectionNode(Node):
             cv2.rectangle(vis, (x, y), (x + w, y + h), (255, 0, 0), 2)
             cv2.circle(vis, (cx, cy), 4, (0, 0, 255), -1)
 
-            text = f'{size_class} ({cx},{cy}) a={int(area)} ang={angle_deg:.1f}'
+            cx_global = x1 + cx
+            cy_global = y1 + cy
+            x_global = x1 + x
+            y_global = y1 + y
+
+            text = f'{size_class} ({cx_global},{cy_global})'
             cv2.putText(
-                vis, text, (x, max(20, y - 10)),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 2
+                vis,
+                text,
+                (x, max(20, y - 10)),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.5,
+                (0, 255, 255),
+                2
             )
 
             detections.append({
-                'x': int(x),
-                'y': int(y),
+                'x': int(x_global),
+                'y': int(y_global),
                 'w': int(w),
                 'h': int(h),
-                'cx': int(cx),
-                'cy': int(cy),
+                'cx': int(cx_global),
+                'cy': int(cy_global),
                 'area': float(area),
                 'angle_deg': float(angle_deg),
                 'size_class': size_class,
