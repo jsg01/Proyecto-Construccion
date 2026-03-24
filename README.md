@@ -27,7 +27,7 @@ Tener instalados:
 ---
 
 
-# Compilar
+# Compilar y lanzar
 
 Desde el workspace:
 
