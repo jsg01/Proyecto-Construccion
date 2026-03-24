@@ -78,13 +78,8 @@ ros2 launch ur_moveit_config ur_moveit.launch.py ur_type:=ur3e launch_rviz:=true
 #Terminal 3
 source /opt/ros/humble/setup.bash
 source ~/robotica_ws/install/setup.bash
-ros2 launch robot_control move_pilz.launch.py x:=0.25 y:=0.00 z:=0.30
+ros2 launch robot_control nodo90grados.launch.py
 
-#Ahora mismo el nodo realiza:
-1. movimiento PTP a una prepose por encima del punto
-2. movimiento LIN de bajada al punto objetivo
-
-Esto sirve como base para una futura estrategia completa de pick and place.
 
 
 #NOTAS:
