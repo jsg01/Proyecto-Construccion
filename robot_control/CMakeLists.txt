@@ -34,10 +34,19 @@ ament_target_dependencies(pick_place
   moveit_ros_planning_interface
 )
 
+add_executable(nodo90grados src/nodo90grados.cpp)
+
+ament_target_dependencies(nodo90grados
+  rclcpp
+  geometry_msgs
+  moveit_ros_planning_interface
+)
+
 install(TARGETS
   move_to_point
   move_pilz
   pick_place
+  nodo90grados
   DESTINATION lib/${PROJECT_NAME}
 )
 
