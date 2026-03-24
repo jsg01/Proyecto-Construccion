@@ -114,7 +114,6 @@ def foreground_from_rgi(rgi: np.ndarray, image_normalized: np.ndarray):
     image_normalized = image_normalized * fg_mask[:, :, None]
     return rgi, image_normalized
 
-    
 
 
 

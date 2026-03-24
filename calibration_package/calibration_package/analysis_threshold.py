@@ -41,11 +41,14 @@ def classify_pixels(rgi, thresholds):
 
     R = rgi[:, :, 0]
     G = rgi[:, :, 1]
+    I = rgi[:, :, 2]
 
-    mask = (R >= thresholds["R_min"] and 
-            R <= thresholds["R_max"] and 
-            G >= thresholds["G_min"] and 
-            G <= thresholds["G_max"])
+    mask = ((R >= thresholds["R_min"]) & 
+            (R <= thresholds["R_max"]) & 
+            (G >= thresholds["G_min"]) & 
+            (G <= thresholds["G_max"]) &
+            (I > 1)
+            )
     return mask
 
 def select_roi(image: np.ndarray):
@@ -64,3 +67,16 @@ def select_roi(image: np.ndarray):
     cv2.destroyWindow("Select ROI")
     cv2.waitKey(1)
     return int(x), int(y), int(w), int(h)
+
+def detect_all_colors(rgi_image: np.ndarray, config_dict: dict) -> dict:
+    """
+    Returns a dictionary of binary masks per color
+    """
+
+    masks = {}
+
+    for color_name, config in config_dict.items():
+        mask = classify_pixels(rgi_image, config)
+        masks[color_name] = mask
+
+    return masks
