@@ -23,6 +23,7 @@ Tener instalados:
 - MoveIt 2
 - Universal Robots ROS 2 Driver
 - workspace compilado con `colcon`
+- usar los archivos .yaml de la carpeta config que he subido (en vez de los que vienen en Universal Robots ROS2 Driver, ya que hay parametros que he cambiado)
 
 ---
 
