@@ -14,33 +14,7 @@ ros2 run rqt_image_view rqt_image_view o abrir rviz2 y add el topic image
 
 Para mover el robot a un punto (en simulacion):
 
-# Control del robot UR3e en simulación con ROS 2 + MoveIt
-
-Este repositorio incluye la parte de control y planificación de movimiento para un UR3e usando ROS 2 Humble, MoveIt 2 y el driver oficial de Universal Robots.
-
-Actualmente esta parte del proyecto permite:
-
-- lanzar el robot en **simulación** con `fake_hardware`
-- lanzar **MoveIt**
-- mover el robot a un punto objetivo usando planificación
-- usar una estrategia de movimiento tipo:
-  - `PTP` hasta una prepose
-  - `LIN` para bajar al objetivo
-
----
-
-# Estructura usada
-
-Se trabaja con:
-
-- **ROS 2 Humble**
-- **MoveIt 2**
-- **Universal_Robots_ROS2_Driver**
-- **ur_moveit_config**
-- paquete propio: **robot_control**
-
----
-
+# Mover el robot en simulación a una configuración concreta con la herramienta hacia abajo
 # Requisitos
 
 Tener instalados:
