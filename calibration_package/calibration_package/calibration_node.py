@@ -130,7 +130,6 @@ class CalibrationNode(Node):
         cv2.waitKey(1)
         return response
     
-    
 def main(args=None):
     rclpy.init(args=args)
     node = CalibrationNode()
