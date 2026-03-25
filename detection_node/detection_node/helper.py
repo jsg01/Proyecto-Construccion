@@ -61,8 +61,8 @@ def background_removal(imageRGI: np.array, image_normalized: np.array, threshold
     if (H != NrH or W != NrW):
         raise ValueError("Maybe the normalized image is different")
     BG_image_RGI, _ = BGR2RGI(BG_image)
-    F_image = np.absolute(imageRGI - BG_image_RGI, np.uint32)
-    mask= (F_image < threshold).any(axis = 2)
+    F_image = np.absolute(imageRGI.astype(np.uint32) - BG_image_RGI.astype(np.uint32))
+    mask = (F_image < threshold).any(axis = 2)
     imageRGI[mask] = 0
     image_normalized[mask] = 0
     return imageRGI, image_normalized

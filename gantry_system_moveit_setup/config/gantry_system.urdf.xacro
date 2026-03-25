@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="gantry_system">
+    <xacro:include filename="$(find gantry_description)/urdf/system_ros2.urdf.xacro"/>
+</robot>

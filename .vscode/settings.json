@@ -18,7 +18,11 @@
         "imread",
         "imwrite",
         "MINMAX",
+        "moveit",
         "Nrchannel",
-        "OTSU"
+        "OTSU",
+        "publishser",
+        "rviz",
+        "substs"
     ]
 }

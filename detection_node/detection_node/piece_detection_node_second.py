@@ -53,6 +53,7 @@ class PieceDetectionNode(Node):
         mask = (self.current_bgr == 255).any(axis = 2)
         self.current_bgr[mask] = 0
         self.current_bgr, _ = hp.BGR2RGI(self.current_bgr)
+        self.current_bgr, _ = hp.background_removal(self.current_bgr, _, 12, "/home/ricardo/Desktop/UPM/LABrobotica/Proyecto-Construccion/LabRob/src/calibration_package/config/background_table.jpg")
         #self.current_bgr, _ = hp.foreground_from_rgi(self.current_bgr, _)
         try:
             msg_out = self.opencv_bridge_.cv2_to_imgmsg(_, encoding='bgr8')
