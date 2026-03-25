@@ -1,250 +1,100 @@
-# 🧩 Detección de piezas con ROS2
+# Piece Detection Node (ROS2)
 
-Este proyecto permite detectar piezas (tipo LEGO) usando una cámara en ROS2 y obtener su posición para que un robot pueda utilizarlas.
+## 📌 Descripción
 
----
+Este nodo detecta piezas (tipo LEGO) mediante visión por computador en ROS2.
 
-# 🎯 Objetivo
+El sistema utiliza **sustracción de fondo** para segmentar objetos y calcula:
 
-El objetivo es:
+* Posición (x, y)
+* Orientación
+* Tamaño (small, medium, large)
 
-* Detectar piezas en una imagen
-* Obtener su posición (cx, cy)
-* Calcular tamaño y orientación
-* Publicar esta información en ROS2
+Compatible con:
 
----
-
-# 🧠 ¿Cómo funciona?
-
-El sistema sigue este flujo:
-
-1. Una cámara (real o rosbag) publica imágenes en:
-
-```
-/image_raw
-```
-
-2. Este nodo:
-
-* recibe la imagen
-* detecta piezas
-* calcula su posición
-
-3. Publica resultados en:
-
-```
-/piece_detections
-```
+* Cámara en tiempo real
+* Rosbag
 
 ---
 
-# ⚙️ PREPARACIÓN (ANTES DE TODO)
+## 🚀 Ejecución
 
-Abrir una terminal y ejecutar:
+### 1. Compilar
 
 ```bash
 cd ~/ros2_ws
-colcon build
+colcon build --packages-select piece_detection_pkg
+source install/setup.bash
 ```
 
 ---
 
-# 🔄 IMPORTANTE: USO DE TERMINALES
-
-👉 Este sistema necesita **3 o 4 terminales abiertas a la vez**
-
-⚠️ En TODAS las terminales debes ejecutar:
+### 2. Ejecutar nodo
 
 ```bash
-source ~/ros2_ws/install/setup.bash
+ros2 run piece_detection_pkg piece_detection_node_final \
+  --ros-args \
+  -p background_path:=/ruta/a/background.jpeg \
+  -p bg_threshold:=0.08 \
+  -p min_area:=500.0 \
+  -p show_debug:=true
 ```
 
 ---
 
-# 🎥 OPCIÓN 1: USAR CÁMARA USB
-
----
-
-## 🟢 TERMINAL 1 — CÁMARA
-
-Ver cámaras disponibles:
+### 3. Ejecutar con rosbag
 
 ```bash
-v4l2-ctl --list-devices
-```
-
-Buscar el dispositivo (ej: `/dev/video2`)
-
-Ejecutar:
-
-```bash
-ros2 run v4l2_camera v4l2_camera_node \
-  --ros-args -p video_device:=/dev/video2
-```
-
-👉 Publica imágenes en `/image_raw`
-
----
-
-## 🔵 TERMINAL 2 — DETECCIÓN
-
-```bash
-ros2 run piece_detection_pkg node_detection
-```
-
-👉 Este nodo:
-
-* recibe imágenes
-* detecta piezas
-* publica `/piece_detections`
-
----
-
-## 🟡 TERMINAL 3 — VISUALIZAR IMAGEN
-
-```bash
-ros2 run rqt_image_view rqt_image_view
-```
-
-Seleccionar:
-
-```
-/image_raw
+cd /ruta/al/rosbag
+ros2 bag play .
 ```
 
 ---
 
-## 🟣 TERMINAL 4 — VER RESULTADOS
+## ⚠️ IMPORTANTE
 
-```bash
-ros2 topic echo /piece_detections
+La imagen de fondo debe:
+
+* ser de la misma escena
+* misma cámara
+* misma posición
+* misma iluminación
+
+---
+
+## 🔧 Parámetros
+
+| Parámetro       | Descripción               |
+| --------------- | ------------------------- |
+| background_path | Ruta del fondo            |
+| bg_threshold    | Sensibilidad de detección |
+| min_area        | Área mínima de detección  |
+| show_debug      | Visualización de debug    |
+
+---
+
+## 🧠 Funcionamiento
+
+```text
+Imagen → Sustracción de fondo → Segmentación → Contornos → Detección
 ```
 
 ---
 
-# 📼 OPCIÓN 2: USAR ROSBAG (SIN CÁMARA)
+## 📍 Estado del proyecto
+
+✔ Detección robusta
+✔ Separación de piezas
+✔ Cálculo de orientación
+✔ Preparado para integración con robot
 
 ---
 
-## 🟢 TERMINAL 1 — ROSBAG
+## 🔜 Próximos pasos
 
-```bash
-ros2 bag play my_bag --loop
-```
-
-👉 IMPORTANTE:
-
-* `--loop` hace que el bag se repita continuamente
-* sin esto, el sistema se para al terminar
+* Calibración cámara (pixel → mundo)
+* Integración con robot
+* Pick & place automático
 
 ---
-
-## 🐢 OPCIONAL (más lento)
-
-```bash
-ros2 bag play my_bag --loop -r 0.5
-```
-
----
-
-## 🔵 TERMINAL 2 — DETECCIÓN
-
-```bash
-ros2 run piece_detection_pkg node_detection
-```
-
----
-
-## 🟡 TERMINAL 3 — VISUALIZAR
-
-```bash
-ros2 run rqt_image_view rqt_image_view
-```
-
-Seleccionar:
-
-```
-/image_raw
-```
-
----
-
-## 🟣 TERMINAL 4 — RESULTADOS
-
-```bash
-ros2 topic echo /piece_detections
-```
-
----
-
-# 📡 RESULTADO
-
-El nodo publica en:
-
-```
-/piece_detections
-```
-
-Ejemplo:
-
-```json
-{
-  "detections": [
-    {
-      "cx": 320,
-      "cy": 240,
-      "w": 50,
-      "h": 48,
-      "area": 2300,
-      "angle_deg": 10.5,
-      "size_class": "mediana"
-    }
-  ]
-}
-```
-
----
-
-# 🧠 ¿Qué hace el código?
-
-El algoritmo realiza:
-
-1. Recorta una zona de la imagen (ROI)
-2. Convierte a HSV
-3. Detecta zonas oscuras
-4. Aplica filtros para eliminar ruido
-5. Detecta contornos
-6. Filtra por:
-
-   * tamaño
-   * forma
-7. Calcula:
-
-   * centro (cx, cy)
-   * orientación
-   * tipo de pieza
-
----
-
-# ⚠️ PROBLEMAS COMUNES
-
-## ❌ No aparece nada
-
-```bash
-source ~/ros2_ws/install/setup.bash
-```
-
----
-
-## ❌ El rosbag se para
-
-👉 Usa siempre:
-
-```bash
-ros2 bag play my_bag --loop
-```
-
----
-
 
