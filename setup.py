@@ -24,7 +24,7 @@ setup(
     },
     entry_points={
     'console_scripts': [
-        'node_detection = piece_detection_pkg.node_detection:main',
+        'piece_detection_node_final = piece_detection_pkg.piece_detection_node_final:main',
     ],
 },
 )
