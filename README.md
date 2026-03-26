@@ -137,8 +137,12 @@ if successful
 (Image will be save at install/calibration_package/share/calibration_package/config, change the name of the picture, or you will lose, also if you want to keep it, move it to src/calibration_package/config)
 
 ## For getting weight colors
-1. ros2 run calibration_package calibration_node (only if it is not already running)
+(only if it is not already running)
+
+1. ros2 run calibration_package calibration_node 
+
 Consider this a current bug:
+
 2. Assuming there is an image with several blocks at install/calibration_package/share/calibration_package/config/picture_taken.jpg, run:
 
 ros2 service call /calibration/SelectCustomColor custom_interfaces/srv/CustomColorDetector "{color: 'color-chosen'}"
