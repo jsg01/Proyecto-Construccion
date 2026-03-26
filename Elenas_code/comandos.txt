@@ -1,0 +1,44 @@
+ABRIR CAMARA:
+ros2 run usb_cam usb_cam_node_exe --ros-args -p video_device:=/dev/video2
+
+En otra terminal: 
+rviz2
+Add -> Topic -> Image
+
+Para ver los fps reales de la cámara: 
+ros2 topic hz /image_raw
+Resultado:
+	min: 0.028s max: 0.300s std dev: 0.01726s window: 2053
+average rate: 27.046
+	min: 0.028s max: 0.300s std dev: 0.01717s window: 2081
+average rate: 27.022
+	min: 0.028s max: 0.300s std dev: 0.01719s window: 2108
+average rate: 26.998
+	min: 0.028s max: 0.300s std dev: 0.01721s window: 2134
+average rate: 27.036
+	min: 0.028s max: 0.300s std dev: 0.01710s window: 2164
+average rate: 27.072
+	min: 0.028s max: 0.300s std dev: 0.01699s window: 2194
+average rate: 27.110
+	min: 0.028s max: 0.300s std dev: 0.01688s window: 2225
+average rate: 27.084
+	min: 0.028s max: 0.300s std dev: 0.01693s window: 2250
+
+
+Para grabar y verlo después:
+ros2 bag record /image_raw
+Ctrl+c para detener grabación
+
+Para ver la grabación:
+Abrir la carpeta de la grabación, abrir una terminal y ejecutar
+ros2 bag play rosbag2_2026_03_12-17_50_01_0.mcap
+Y en otra terminal abrir Rviz añadiendo el topic Image como si de la cámara se tratase
+
+Instalar OpenCv:
+sudo apt update
+sudo apt install ros-jazzy-cv-bridge python3-opencv
+
+Conectar cámara y ejecutar:
+python3 piece_detection_publisher.py
+En otra terminal:
+ros2 topic echo /piece_detections
