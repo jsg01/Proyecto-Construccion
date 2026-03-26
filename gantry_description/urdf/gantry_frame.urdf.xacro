@@ -1,17 +1,6 @@
 <?xml version="1.0"?>
 
 <robot xmlns:xacro="http://wiki.ros.org/xacro">
-    
-    <!-- original
-    height_TV:=1.12
-    width_TV:=1.82
-    -->
-
-      <!-- bigger display
-    height_TV:=1.25
-    width_TV:=2.1
-    -->
-    
     <xacro:macro name="gantry_frame" params="
         use_fake_hardware:=false
         sim_gazebo:=false
@@ -33,13 +22,5 @@
         x_limit:=2.095
         y_limit:=0.391
         ">
-
-      
-
-       
-
-
-
-      
     </xacro:macro>
 </robot>

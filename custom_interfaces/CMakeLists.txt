@@ -15,6 +15,10 @@ find_package(std_msgs REQUIRED)
 # custom messages
 rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/CustomColorDetector.srv"
+  "srv/AdjustRobotSpeed.srv"
+  "srv/MoveJoints.srv"
+  "srv/MoveLinear.srv"
+  "srv/MovePreset.srv"
 
   DEPENDENCIES sensor_msgs geometry_msgs std_msgs
 )

@@ -1,0 +1,25 @@
+moveit_setup_assistant_config:
+  urdf:
+    package: gantry_description
+    relative_path: urdf/robot_lab.urdf.xacro
+  srdf:
+    relative_path: config/robot_lab.srdf
+  package_settings:
+    author_name: ricardo
+    author_email: ricardo.ortiz@upm.alumnos.es
+    generated_timestamp: 1774476092
+  control_xacro:
+    command:
+      - position
+    state:
+      - position
+      - velocity
+  modified_urdf:
+    xacros:
+      - control_xacro
+  control_xacro:
+    command:
+      - position
+    state:
+      - position
+      - velocity

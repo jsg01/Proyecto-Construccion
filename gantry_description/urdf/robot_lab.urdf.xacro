@@ -1,18 +1,15 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://wiki.ros.org/xacro" name="robot_lab">
-   <!-- import main macro of ur robot -->
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="ur3e">
+   <!-- import main macro -->
    <xacro:include filename="$(find ur_description)/urdf/ur_macro.xacro"/>
-   
-   
 
-   <!-- possible 'ur_type' values: ur3, ur3e, ur5, ur5e, ur10, ur10e, ur16e, ur20, ur30 -->
+   <!-- possible 'ur_type' values: ur3, ur3e, ur5, ur5e, ur7e, ur10, ur10e, ur12e, ur16e, ur20, ur30 -->
    <!-- the default value should raise an error in case this was called without defining the type -->
    <xacro:arg name="ur_type" default="ur3e"/>
 
-   <!-- parameters for end-effector-->
-   <!-- parameters for ur robot -->
+   <!-- parameters -->
    <xacro:arg name="tf_prefix" default="" />
-   <xacro:arg name="joint_limit_params" default="$(find gantry_description)/config/joint_limits.yaml"/>
+   <xacro:arg name="joint_limit_params" default="$(find ur_description)/config/$(arg ur_type)/joint_limits.yaml"/>
    <xacro:arg name="kinematics_params" default="$(find ur_description)/config/$(arg ur_type)/default_kinematics.yaml"/>
    <xacro:arg name="physical_params" default="$(find ur_description)/config/$(arg ur_type)/physical_parameters.yaml"/>
    <xacro:arg name="visual_params" default="$(find ur_description)/config/$(arg ur_type)/visual_parameters.yaml"/>
@@ -52,22 +49,17 @@
    <!-- initial position for simulations (Fake Hardware, Gazebo, Ignition) -->
    <xacro:arg name="initial_positions_file" default="$(find ur_description)/config/initial_positions.yaml"/>
 
-   <!-- Parameters of gantry-->
-   <xacro:arg name="gantry_environment" default="$(find gantry_description)/config/gantry_environment.yaml"/>
-
    <!-- convert to property to use substitution in function -->
-   <xacro:property name="initial_positions_file" value="$(arg initial_positions_file)"/>
-   <xacro:property name="gantry_environment" value="$(arg gantry_environment)"/>
+   <xacro:property name="initial_positions_file" default="$(arg initial_positions_file)"/>
+   <xacro:property name="is_sim_gazebo" value="$(arg sim_gazebo)"/>
+   <xacro:property name="is_sim_ignition" value="$(arg sim_ignition)"/>
 
-   <!-- Get parameters from YAML file-->
-   <xacro:property name="gantry_environment_parameters" value="${xacro.load_yaml(gantry_environment)}"/>
-
-   <!-- gantry system -->
    <!-- create link fixed to the "world" -->
    <link name="world" />
 
+  
 
-   <!-- ur_arm -->
+   <!-- arm -->
    <xacro:ur_robot
      name="ur3e"
      tf_prefix="$(arg tf_prefix)"
@@ -105,30 +97,9 @@
      script_sender_port="$(arg script_sender_port)"
      trajectory_port="$(arg trajectory_port)"
      >
-     <origin xyz="0 0 0" rpy="0 0 0" />          <!-- position robot w.r.t parent -->
+     <origin xyz="0 0 0" rpy="0 0 0" />          <!-- position robot in the world -->
    </xacro:ur_robot>
 
-
-
-   <!-- TCP -->
-   <link name="tool1"/>
-   <joint name="tcp" type="fixed">
-      <origin rpy="0 0 0" xyz="${gantry_environment_parameters['TCP']['x']} ${gantry_environment_parameters['TCP']['y']} ${gantry_environment_parameters['TCP']['z']}"/>
-      <parent link="tool0"/>
-      <child link="tool1"/>
-   </joint>
-
-
-
-   <!-- Gazebo plugins -->
-   <xacro:if value="$(arg sim_gazebo)">
-    <gazebo reference="world">
-    </gazebo>
-    <gazebo>
-      <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
-        <parameters>$(arg simulation_controllers)</parameters>
-      </plugin>
-    </gazebo>
-  </xacro:if>
+  
 
 </robot>
