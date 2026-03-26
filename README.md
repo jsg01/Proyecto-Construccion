@@ -133,6 +133,7 @@ ros2 bag record /image_raw
 1. ros2 run calibration_package calibration_node
 if successful 
 2. ros2 service call /calibration/picture std_srvs/srv/Trigger "{}"
+
 (Image will be save at install/calibration_package/share/calibration_package/config, change the name of the picture, or you will lose, also if you want to keep it, move it to src/calibration_package/config)
 
 ## For getting weight colors
