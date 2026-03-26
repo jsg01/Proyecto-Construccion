@@ -159,7 +159,7 @@ ros2 service call /calibration/SelectCustomColor custom_interfaces/srv/CustomCol
 gantry_setup_robot_lab/config/gantry_system.srdf
 
 Example:
-
+```
 <group_state name="HOME" group="ur10e">
         <joint name="elbow_joint" value="0.0"/>
         <joint name="shoulder_lift_joint" value="-1.5707"/>
@@ -168,3 +168,4 @@ Example:
         <joint name="wrist_2_joint" value="-1.5707"/>
         <joint name="wrist_3_joint" value="0.0"/>
 </group_state>
+```
