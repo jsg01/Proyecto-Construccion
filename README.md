@@ -14,7 +14,7 @@ ros2 run rqt_image_view rqt_image_view o abrir rviz2 y add el topic image
 
 Para mover el robot a un punto (en simulacion):
 
-# Mover el robot en simulación a una configuración concreta con la herramienta hacia abajo
+# Mover el robot en simulación a una posición con la herramienta hacia abajo a partir de las coordenadas de una pieza (por ahora ya dadas en el script)
 # Requisitos
 
 Tener instalados:
@@ -53,7 +53,7 @@ ros2 launch ur_moveit_config ur_moveit.launch.py ur_type:=ur3e launch_rviz:=true
 #Terminal 3
 source /opt/ros/humble/setup.bash
 source ~/robotica_ws/install/setup.bash
-ros2 launch robot_control nodo90grados.launch.py
+ros2 launch robot_control move_to_pose.launch.py
 
 
 
