@@ -1,0 +1,41 @@
+running egg_info
+creating build/piece_detection_pkg/piece_detection_pkg.egg-info
+writing build/piece_detection_pkg/piece_detection_pkg.egg-info/PKG-INFO
+writing dependency_links to build/piece_detection_pkg/piece_detection_pkg.egg-info/dependency_links.txt
+writing entry points to build/piece_detection_pkg/piece_detection_pkg.egg-info/entry_points.txt
+writing requirements to build/piece_detection_pkg/piece_detection_pkg.egg-info/requires.txt
+writing top-level names to build/piece_detection_pkg/piece_detection_pkg.egg-info/top_level.txt
+writing manifest file 'build/piece_detection_pkg/piece_detection_pkg.egg-info/SOURCES.txt'
+reading manifest file 'build/piece_detection_pkg/piece_detection_pkg.egg-info/SOURCES.txt'
+writing manifest file 'build/piece_detection_pkg/piece_detection_pkg.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/build/piece_detection_pkg/build
+creating /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/build/piece_detection_pkg/build/lib
+creating /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/build/piece_detection_pkg/build/lib/piece_detection_pkg
+copying piece_detection_pkg/__init__.py -> /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/build/piece_detection_pkg/build/lib/piece_detection_pkg
+copying piece_detection_pkg/piece_detection_node_final.py -> /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/build/piece_detection_pkg/build/lib/piece_detection_pkg
+copying piece_detection_pkg/node_detection.py -> /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/build/piece_detection_pkg/build/lib/piece_detection_pkg
+copying piece_detection_pkg/prueba.py -> /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/build/piece_detection_pkg/build/lib/piece_detection_pkg
+running install
+running install_lib
+creating /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/install/piece_detection_pkg/lib/python3.12/site-packages/piece_detection_pkg
+copying /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/build/piece_detection_pkg/build/lib/piece_detection_pkg/__init__.py -> /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/install/piece_detection_pkg/lib/python3.12/site-packages/piece_detection_pkg
+copying /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/build/piece_detection_pkg/build/lib/piece_detection_pkg/piece_detection_node_final.py -> /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/install/piece_detection_pkg/lib/python3.12/site-packages/piece_detection_pkg
+copying /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/build/piece_detection_pkg/build/lib/piece_detection_pkg/node_detection.py -> /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/install/piece_detection_pkg/lib/python3.12/site-packages/piece_detection_pkg
+copying /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/build/piece_detection_pkg/build/lib/piece_detection_pkg/prueba.py -> /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/install/piece_detection_pkg/lib/python3.12/site-packages/piece_detection_pkg
+byte-compiling /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/install/piece_detection_pkg/lib/python3.12/site-packages/piece_detection_pkg/__init__.py to __init__.cpython-312.pyc
+byte-compiling /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/install/piece_detection_pkg/lib/python3.12/site-packages/piece_detection_pkg/piece_detection_node_final.py to piece_detection_node_final.cpython-312.pyc
+byte-compiling /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/install/piece_detection_pkg/lib/python3.12/site-packages/piece_detection_pkg/node_detection.py to node_detection.cpython-312.pyc
+byte-compiling /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/install/piece_detection_pkg/lib/python3.12/site-packages/piece_detection_pkg/prueba.py to prueba.cpython-312.pyc
+running install_data
+creating /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/install/piece_detection_pkg/share/ament_index
+creating /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/install/piece_detection_pkg/share/ament_index/resource_index
+creating /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/install/piece_detection_pkg/share/ament_index/resource_index/packages
+copying resource/piece_detection_pkg -> /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/install/piece_detection_pkg/share/ament_index/resource_index/packages
+copying package.xml -> /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/install/piece_detection_pkg/share/piece_detection_pkg
+running install_egg_info
+Copying build/piece_detection_pkg/piece_detection_pkg.egg-info to /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/install/piece_detection_pkg/lib/python3.12/site-packages/piece_detection_pkg-0.0.0-py3.12.egg-info
+running install_scripts
+Installing piece_detection_node_final script to /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/install/piece_detection_pkg/lib/piece_detection_pkg
+writing list of installed files to '/home/elena/Escritorio/LabRobotica/Proyecto-Construccion/build/piece_detection_pkg/install.log'

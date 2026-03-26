@@ -1,0 +1,3 @@
+[console_scripts]
+piece_detection_node_final = piece_detection_pkg.piece_detection_node_final:main
+piece_detection_sinBackground = piece_detection_pkg.piece_detection_sinBackground:main

@@ -1,0 +1,28 @@
+[1.146s] Invoking command in '/home/elena/Escritorio/LabRobotica/Proyecto-Construccion': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/elena/Escritorio/LabRobotica/Proyecto-Construccion/build/piece_detection_pkg/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/elena/Escritorio/LabRobotica/Proyecto-Construccion/install/piece_detection_pkg/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base build/piece_detection_pkg build --build-base /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/build/piece_detection_pkg/build install --record /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/build/piece_detection_pkg/install.log --single-version-externally-managed install_data
+[1.669s] running egg_info
+[1.691s] writing build/piece_detection_pkg/piece_detection_pkg.egg-info/PKG-INFO
+[1.691s] writing dependency_links to build/piece_detection_pkg/piece_detection_pkg.egg-info/dependency_links.txt
+[1.692s] writing entry points to build/piece_detection_pkg/piece_detection_pkg.egg-info/entry_points.txt
+[1.692s] writing requirements to build/piece_detection_pkg/piece_detection_pkg.egg-info/requires.txt
+[1.692s] writing top-level names to build/piece_detection_pkg/piece_detection_pkg.egg-info/top_level.txt
+[1.747s] reading manifest file 'build/piece_detection_pkg/piece_detection_pkg.egg-info/SOURCES.txt'
+[1.748s] writing manifest file 'build/piece_detection_pkg/piece_detection_pkg.egg-info/SOURCES.txt'
+[1.748s] running build
+[1.748s] running build_py
+[1.748s] copying piece_detection_pkg/piece_detection_node_final.py -> /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/build/piece_detection_pkg/build/lib/piece_detection_pkg
+[1.749s] copying piece_detection_pkg/piece_detection_sinBackground.py -> /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/build/piece_detection_pkg/build/lib/piece_detection_pkg
+[1.749s] running install
+[1.758s] running install_lib
+[1.781s] copying /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/build/piece_detection_pkg/build/lib/piece_detection_pkg/piece_detection_node_final.py -> /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/install/piece_detection_pkg/lib/python3.12/site-packages/piece_detection_pkg
+[1.781s] copying /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/build/piece_detection_pkg/build/lib/piece_detection_pkg/piece_detection_sinBackground.py -> /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/install/piece_detection_pkg/lib/python3.12/site-packages/piece_detection_pkg
+[1.782s] byte-compiling /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/install/piece_detection_pkg/lib/python3.12/site-packages/piece_detection_pkg/piece_detection_node_final.py to piece_detection_node_final.cpython-312.pyc
+[1.786s] byte-compiling /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/install/piece_detection_pkg/lib/python3.12/site-packages/piece_detection_pkg/piece_detection_sinBackground.py to piece_detection_sinBackground.cpython-312.pyc
+[1.789s] running install_data
+[1.789s] running install_egg_info
+[1.817s] removing '/home/elena/Escritorio/LabRobotica/Proyecto-Construccion/install/piece_detection_pkg/lib/python3.12/site-packages/piece_detection_pkg-0.0.0-py3.12.egg-info' (and everything under it)
+[1.818s] Copying build/piece_detection_pkg/piece_detection_pkg.egg-info to /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/install/piece_detection_pkg/lib/python3.12/site-packages/piece_detection_pkg-0.0.0-py3.12.egg-info
+[1.819s] running install_scripts
+[2.005s] Installing piece_detection_node_final script to /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/install/piece_detection_pkg/lib/piece_detection_pkg
+[2.005s] Installing piece_detection_sinBackground script to /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/install/piece_detection_pkg/lib/piece_detection_pkg
+[2.006s] writing list of installed files to '/home/elena/Escritorio/LabRobotica/Proyecto-Construccion/build/piece_detection_pkg/install.log'
+[2.054s] Invoked command in '/home/elena/Escritorio/LabRobotica/Proyecto-Construccion' returned '0': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/elena/Escritorio/LabRobotica/Proyecto-Construccion/build/piece_detection_pkg/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/elena/Escritorio/LabRobotica/Proyecto-Construccion/install/piece_detection_pkg/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base build/piece_detection_pkg build --build-base /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/build/piece_detection_pkg/build install --record /home/elena/Escritorio/LabRobotica/Proyecto-Construccion/build/piece_detection_pkg/install.log --single-version-externally-managed install_data

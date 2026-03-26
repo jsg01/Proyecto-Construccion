@@ -1,0 +1,4 @@
+source;share/piece_detection_pkg/hook/pythonpath.dsv
+source;share/piece_detection_pkg/hook/pythonpath.sh
+source;share/piece_detection_pkg/hook/ament_prefix_path.dsv
+source;share/piece_detection_pkg/hook/ament_prefix_path.sh
