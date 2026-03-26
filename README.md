@@ -146,3 +146,25 @@ Consider this a current bug:
 2. Assuming there is an image with several blocks at install/calibration_package/share/calibration_package/config/picture_taken.jpg, run:
 
 ros2 service call /calibration/SelectCustomColor custom_interfaces/srv/CustomColorDetector "{color: 'color-chosen'}"
+
+3. A yaml with the weights will be stored at ~/.ros/color_calibration.yaml
+
+## Description of packages
+- calibration_package: A package mainly used for coding services that happen only one time.
+- custom_interfaces: A package used for creating our own custom messages.
+- detection_node: A package used for detecting the pieces
+- gantry_description: Has the geometries and some settings for MoveIt
+- gantry_system_moveit_setup: Also has geometries and some settings for MoveIt, could be used for saving new positions of the robot at:
+
+gantry_setup_robot_lab/config/gantry_system.srdf
+
+Example:
+
+<group_state name="HOME" group="ur10e">
+        <joint name="elbow_joint" value="0.0"/>
+        <joint name="shoulder_lift_joint" value="-1.5707"/>
+        <joint name="shoulder_pan_joint" value="1.5707"/>
+        <joint name="wrist_1_joint" value="-1.5707"/>
+        <joint name="wrist_2_joint" value="-1.5707"/>
+        <joint name="wrist_3_joint" value="0.0"/>
+</group_state>
