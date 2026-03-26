@@ -119,3 +119,24 @@ ros2 bag record /image_raw
 ```
 
 ---
+
+---
+## USING UR3e
+1.-  ros2 launch moveit_setup_robot_lab driver_ur34.launch.py
+1a- (For simulation) ros2 launch moveit_setup_robot_lab driver_ur34.launch.py "use_fake_hardware:=true"
+2.- ros2 control load_controller scaled_joint_trajectory_controller
+3.- ros2 control set_controller_state scaled_joint_trajectory_controller active
+4.- ros2 launch moveit_setup_robot_lab move_group.launch.py
+5.- ros2 launch moveit_setup_robot_lab moveit_rviz.launch.py
+
+## For taking a picture
+1.- ros2 run calibration_package calibration_node
+if successful 
+2.- ros2 service call /calibration/picture std_srvs/srv/Trigger "{}"
+(Image will be save at install/calibration_package/share/calibration_package/config, change the name of the picture, or you will lose, also if you want to keep it, move it to src/calibration_package/config)
+
+## For getting weight colors
+1.- ros2 run calibration_package calibration_node (only if it is not already running)
+Consider this a current bug:
+2.- Assuming there is an image with several blocks at install/calibration_package/share/calibration_package/config/picture_taken.jpg, run:
+ros2 service call /calibration/SelectCustomColor custom_interfaces/srv/CustomColorDetector "{color: 'color-chosen'}"
