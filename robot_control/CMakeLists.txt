@@ -9,6 +9,8 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
+find_package(tf2 REQUIRED)
+
 
 add_executable(move_to_point src/move_to_point.cpp)
 
@@ -42,11 +44,21 @@ ament_target_dependencies(nodo90grados
   moveit_ros_planning_interface
 )
 
+add_executable(move_to_pose src/move_to_pose.cpp)
+
+ament_target_dependencies(move_to_pose
+  rclcpp
+  geometry_msgs
+  moveit_ros_planning_interface
+  tf2
+)
+
 install(TARGETS
   move_to_point
   move_pilz
   pick_place
   nodo90grados
+  move_to_pose
   DESTINATION lib/${PROJECT_NAME}
 )
 
