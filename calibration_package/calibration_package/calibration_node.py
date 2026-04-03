@@ -21,6 +21,8 @@ class Colors(Enum):
     ORANGE = "orange"
     BLUE = "blue"
     WHITE = "white"
+    GREEN = "green"
+    RED = "red"
     YELLOW = "yellow"
 
 def is_valid_color(color_str: str) -> bool:
@@ -56,7 +58,7 @@ class CalibrationNode(Node):
 
     def load_calibration_image(self):
         pkg_share = get_package_share_directory("calibration_package")
-        file_path = os.path.join(pkg_share, "config", "picture_taken.jpg")
+        file_path = os.path.join(pkg_share, "config", "sample_colors2.jpg")
         image = cv2.imread(file_path)
         if image is None:
             raise ValueError(f"Image not found at {file_path}")

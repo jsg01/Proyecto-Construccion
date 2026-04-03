@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
+import json
 import math
 import cv2
 import numpy as np
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image
+from std_msgs.msg import String
 from cv_bridge import CvBridge
 
 
@@ -14,11 +16,13 @@ class PieceDetectionNode(Node):
         self.bridge = CvBridge()
 
         self.declare_parameter('image_topic', '/image_raw')
+        self.declare_parameter('output_topic', '/piece_detections')
         self.declare_parameter('min_area', 800.0)
         self.declare_parameter('binary_inverted', True)
         self.declare_parameter('show_debug', True)
 
         image_topic = self.get_parameter('image_topic').value
+        output_topic = self.get_parameter('output_topic').value
         self.min_area = float(self.get_parameter('min_area').value)
         self.binary_inverted = bool(self.get_parameter('binary_inverted').value)
         self.show_debug = bool(self.get_parameter('show_debug').value)
@@ -30,7 +34,10 @@ class PieceDetectionNode(Node):
             10
         )
 
+        self.publisher = self.create_publisher(String, output_topic, 10)
+
         self.get_logger().info(f'Escuchando imágenes en: {image_topic}')
+        self.get_logger().info(f'Publicando detecciones en: {output_topic}')
 
     def image_callback(self, msg: Image) -> None:
         try:
@@ -40,6 +47,16 @@ class PieceDetectionNode(Node):
             return
 
         annotated, mask, detections = self.detect_pieces(frame)
+
+        payload = {
+            'image_width': int(frame.shape[1]),
+            'image_height': int(frame.shape[0]),
+            'detections': detections
+        }
+
+        out_msg = String()
+        out_msg.data = json.dumps(payload)
+        self.publisher.publish(out_msg)
 
         for i, det in enumerate(detections, start=1):
             self.get_logger().info(
@@ -66,7 +83,6 @@ class PieceDetectionNode(Node):
         kernel = np.ones((5, 5), np.uint8)
         mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
         mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
-        
 
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -84,7 +100,6 @@ class PieceDetectionNode(Node):
             rect = cv2.minAreaRect(cnt)
             (rx, ry), (rw, rh), angle = rect
 
-            # Normalizar ángulo para que sea más interpretable
             angle_deg = float(angle)
             if rw < rh:
                 angle_deg = angle_deg + 90.0
@@ -123,7 +138,6 @@ class PieceDetectionNode(Node):
         shortest = min(w, h)
         aspect_ratio = longest / max(shortest, 1)
 
-        # Umbrales iniciales: tendréis que ajustarlos con vuestra cámara y distancia
         if area < 1800:
             return 'pequena'
         if aspect_ratio > 1.6 and area < 5000:

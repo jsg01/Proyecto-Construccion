@@ -12,7 +12,9 @@
         "/opt/ros/humble/local/lib/python3.10/dist-packages"
     ],
     "cSpell.words": [
+        "arctan",
         "Bgchannel",
+        "callbackgroup",
         "Gimage",
         "imgmsg",
         "imread",

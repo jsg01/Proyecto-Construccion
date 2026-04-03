@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+import yaml
 
 def BGR2RGI(frame: np.ndarray):
     """
@@ -66,6 +67,80 @@ def background_removal(imageRGI: np.array, image_normalized: np.array, threshold
     imageRGI[mask] = 0
     image_normalized[mask] = 0
     return imageRGI, image_normalized
+
+def detect_color(imageRGI: np.array, image_normalized: np.array, yaml_path: str, color: str):
+    H, W, channel = np.shape(imageRGI)
+    if (channel != 3):
+        raise ValueError("imageRGI does not have 3 channels")
+    try:
+        with open(yaml_path, 'r') as f:
+                config = yaml.safe_load(f)
+    except Exception as e:
+        print(f"Python says: {e}")
+        raise NameError("Wrong path for the Yaml file")
+    r = imageRGI[:, :, 0]
+    g = imageRGI[:, :, 1]
+    I = imageRGI[:, :, 2]
+
+    for color_name, params in config.items():
+        if color_name == color:
+            mask = (
+                (I <= 1) |
+                (r <= params['R_min']) | (r >= params['R_max']) |
+                (g <= params['G_min']) | (g >= params['G_max'])
+            )
+            mask_uint8 = mask.astype(np.uint8) * 255
+            mask_uint8 = cv2.morphologyEx(mask_uint8, cv2.MORPH_OPEN, np.ones((10,10),np.uint8))
+            mask_uint8 = cv2.morphologyEx(mask_uint8, cv2.MORPH_CLOSE, np.ones((5,5),np.uint8))
+            mask = mask_uint8 > 0
+            imageRGI[mask] = 0
+            image_normalized[mask] = 0
+            mask = ~mask
+            mask_uint8 = mask.astype(np.uint8) * 255
+            num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(mask_uint8 , 4 , cv2.CV_32S)
+            # keep this outside (global or before loop)
+            prev_dirs = {}
+            center_angle_output = []
+            for i in range(1, num_labels):  # skip background
+                if stats[i, cv2.CC_STAT_AREA] < 50:
+                    continue
+                blob_mask = (labels == i).astype(np.uint8) * 255
+                contours, _ = cv2.findContours(blob_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                if len(contours) == 0:
+                    continue
+                cnt = max(contours, key=cv2.contourArea)
+                data_pts = cnt.reshape(-1, 2).astype(np.float32)
+                mean, eigenvectors = cv2.PCACompute(data_pts, mean=None)
+                cx, cy = mean[0]
+                vx, vy = eigenvectors[0]
+                if i in prev_dirs:
+                    prev_vx, prev_vy = prev_dirs[i]
+                    if (vx * prev_vx + vy * prev_vy) < 0:
+                        vx, vy = -vx, -vy
+                prev_dirs[i] = (vx, vy)
+                angle = np.degrees(np.arctan2(-vy, vx))
+                if angle < 0:
+                    angle += 360
+                #print(f"Blob {i} | Center: ({cx:.1f}, {cy:.1f}) | Direction angle: {angle:.2f}°")
+                center_angle_output.append((i ,cx, cy, angle))
+            return [imageRGI, image_normalized, center_angle_output]
+    return []
+
+
+def image_angle_editor(image: np.ndarray, center_angle: tuple):
+    (label, cx, cy, angle,) = center_angle
+    length = 50  # how long you want the line
+    angle_rad = np.radians(angle)
+    
+    x1 = int(cx)
+    y1 = int(cy)
+    
+    x2 = int(cx + length * np.cos(angle_rad))
+    y2 = int(cy - length * np.sin(angle_rad))  # minus because image y goes down
+    
+    cv2.line(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
+    return image
+
 
 def foreground_from_rgi(rgi: np.ndarray, image_normalized: np.ndarray):
     """

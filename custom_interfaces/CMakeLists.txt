@@ -19,6 +19,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/MoveJoints.srv"
   "srv/MoveLinear.srv"
   "srv/MovePreset.srv"
+  "srv/DetectSpecificColor.srv"
 
   DEPENDENCIES sensor_msgs geometry_msgs std_msgs
 )
