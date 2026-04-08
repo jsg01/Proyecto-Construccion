@@ -3,11 +3,13 @@
 #include <geometry_msgs/msg/pose.hpp>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
 #include <moveit_msgs/msg/collision_object.hpp>
+#include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <shape_msgs/msg/solid_primitive.hpp>
 
 #include <thread>
 #include <chrono>
 #include <cmath>
+#include <vector>
 
 using namespace std::chrono_literals;
 
@@ -31,6 +33,10 @@ int main(int argc, char ** argv)
     move_group.setNumPlanningAttempts(10);
     move_group.allowReplanning(false);
 
+    move_group.setPlannerId("RRTConnectkConfigDefault");
+    move_group.setGoalPositionTolerance(0.005);
+    move_group.setGoalOrientationTolerance(0.01);
+
     move_group.setStartStateToCurrentState();
     
     moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
@@ -40,33 +46,24 @@ int main(int argc, char ** argv)
     collision_object.header.frame_id = "base_link";
     collision_object.id = "mesa";
 
-    // Forma: caja
     shape_msgs::msg::SolidPrimitive primitive;
     primitive.type = primitive.BOX;
+    primitive.dimensions = {1.0, 1.0, 0.05};
 
-    // dimensiones (ajusta a tu mesa real)
-    primitive.dimensions = {1.0, 1.0, 0.05};  // ancho, largo, alto
-
-    // posición de la mesa
     geometry_msgs::msg::Pose table_pose;
     table_pose.orientation.w = 1.0;
     table_pose.position.x = 0.0;
     table_pose.position.y = 0.0;
-    table_pose.position.z = -0.025; // mitad del alto
+    table_pose.position.z = -0.025;
 
     collision_object.primitives.push_back(primitive);
     collision_object.primitive_poses.push_back(table_pose);
     collision_object.operation = collision_object.ADD;
 
-    // añadir al entorno
     planning_scene_interface.applyCollisionObject(collision_object);
-
-    // pequeño delay para que se registre
     rclcpp::sleep_for(std::chrono::milliseconds(500));
 
-    // =========================
-    // 🔹 NUEVO: leer parámetros (en vez de cin)
-    // =========================
+    // parámetros
     double x = node->declare_parameter("x", 0.2);
     double y = node->declare_parameter("y", 0.0);
     double z = node->declare_parameter("z", 0.1);
@@ -74,45 +71,85 @@ int main(int argc, char ** argv)
     RCLCPP_INFO(node->get_logger(),
         "Objetivo recibido: x=%.3f y=%.3f z=%.3f", x, y, z);
 
-    // =========================
-    // 🔹 pose objetivo
-    // =========================
+    // pose objetivo
     geometry_msgs::msg::Pose target_pose;
-
     target_pose.position.x = x;
     target_pose.position.y = y;
     target_pose.position.z = z;
 
-    // orientación hacia abajo (UR)
     target_pose.orientation.x = 1.0;
     target_pose.orientation.y = 0.0;
     target_pose.orientation.z = 0.0;
     target_pose.orientation.w = 0.0;
 
-    // =========================
-    // 🔹 planificación
-    // =========================
-    move_group.setPoseTarget(target_pose);
+    auto current_pose = move_group.getCurrentPose().pose;
 
-    moveit::planning_interface::MoveGroupInterface::Plan plan;
+    double dx = target_pose.position.x - current_pose.position.x;
+    double dy = target_pose.position.y - current_pose.position.y;
+    double dz = target_pose.position.z - current_pose.position.z;
+    double dist = std::sqrt(dx * dx + dy * dy + dz * dz);
 
-    bool ok = (move_group.plan(plan) == moveit::core::MoveItErrorCode::SUCCESS);
+    // Si el movimiento es pequeño, usar cartesiano
+    if (dist < 0.1)
+    {
+        RCLCPP_INFO(node->get_logger(), "Movimiento CARTESIANO");
 
-    if (!ok) {
-        RCLCPP_ERROR(node->get_logger(), "Punto NO alcanzable");
-        rclcpp::shutdown();
-        spin_thread.join();
-        return 1;
+        std::vector<geometry_msgs::msg::Pose> waypoints;
+        waypoints.push_back(target_pose);
+
+        moveit_msgs::msg::RobotTrajectory trajectory;
+
+        double fraction = move_group.computeCartesianPath(
+            waypoints,
+            0.01,   // eef_step
+            0.0,    // jump_threshold
+            trajectory
+        );
+
+        if (fraction < 0.9) {
+            RCLCPP_ERROR(node->get_logger(),
+                "No se pudo calcular trayectoria cartesiana completa (fraction=%.2f)", fraction);
+            rclcpp::shutdown();
+            spin_thread.join();
+            return 1;
+        }
+
+        moveit::planning_interface::MoveGroupInterface::Plan plan;
+        plan.trajectory_ = trajectory;
+
+        auto exec_ok = move_group.execute(plan);
+
+        if (exec_ok == moveit::core::MoveItErrorCode::SUCCESS) {
+            RCLCPP_INFO(node->get_logger(), "Movimiento cartesiano ejecutado correctamente");
+        } else {
+            RCLCPP_ERROR(node->get_logger(), "Error ejecutando movimiento cartesiano");
+        }
     }
+    else
+    {
+        RCLCPP_INFO(node->get_logger(), "Movimiento JOINT (planificador)");
 
-    RCLCPP_INFO(node->get_logger(), "Punto alcanzable, ejecutando...");
+        move_group.setPoseTarget(target_pose);
 
-    auto exec_ok = move_group.execute(plan);
+        moveit::planning_interface::MoveGroupInterface::Plan plan;
+        bool ok = (move_group.plan(plan) == moveit::core::MoveItErrorCode::SUCCESS);
 
-    if (exec_ok == moveit::core::MoveItErrorCode::SUCCESS) {
-        RCLCPP_INFO(node->get_logger(), "Movimiento ejecutado correctamente");
-    } else {
-        RCLCPP_ERROR(node->get_logger(), "Error ejecutando movimiento");
+        if (!ok) {
+            RCLCPP_ERROR(node->get_logger(), "Punto NO alcanzable");
+            rclcpp::shutdown();
+            spin_thread.join();
+            return 1;
+        }
+
+        RCLCPP_INFO(node->get_logger(), "Punto alcanzable, ejecutando...");
+
+        auto exec_ok = move_group.execute(plan);
+
+        if (exec_ok == moveit::core::MoveItErrorCode::SUCCESS) {
+            RCLCPP_INFO(node->get_logger(), "Movimiento ejecutado correctamente");
+        } else {
+            RCLCPP_ERROR(node->get_logger(), "Error ejecutando movimiento");
+        }
     }
 
     rclcpp::shutdown();
