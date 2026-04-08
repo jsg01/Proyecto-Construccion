@@ -49,7 +49,7 @@ int main(int argc, char ** argv)
 
     shape_msgs::msg::SolidPrimitive primitive;
     primitive.type = primitive.BOX;
-    primitive.dimensions = {1.20, 0.70, 0.05};
+    primitive.dimensions = {0.7, 1.2, 0.05};
 
     geometry_msgs::msg::Pose table_pose;
     table_pose.orientation.w = 1.0;
@@ -70,12 +70,12 @@ int main(int argc, char ** argv)
 
     shape_msgs::msg::SolidPrimitive wall_primitive;
     wall_primitive.type = wall_primitive.BOX;
-    wall_primitive.dimensions = {1.2, 0.02, 0.80};
+    wall_primitive.dimensions = {0.02, 0.70, 0.80};
 
     geometry_msgs::msg::Pose wall_pose;
     wall_pose.orientation.w = 1.0;
-    wall_pose.position.x = 0.0;
-    wall_pose.position.y = 0.36;
+    wall_pose.position.x = -0.36;
+    wall_pose.position.y = 0.0;
     wall_pose.position.z = 0.40;
 
     wall_object.primitives.push_back(wall_primitive);
