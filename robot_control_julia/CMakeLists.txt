@@ -52,6 +52,14 @@ ament_target_dependencies(move_to_point_ok
   moveit_ros_planning_interface
 )
 
+add_executable(move_to_point_ok_orientacion src/move_to_point_ok_orientacion.cpp)
+
+ament_target_dependencies(move_to_point_ok_orientacion
+  rclcpp
+  geometry_msgs
+  moveit_ros_planning_interface
+)
+
 add_executable(move_to_pose src/move_to_pose.cpp)
 
 ament_target_dependencies(move_to_pose
@@ -68,6 +76,7 @@ install(TARGETS
   nodo90grados
   move_to_pose
   move_to_point_ok
+  move_to_point_ok_orientacion
   DESTINATION lib/${PROJECT_NAME}
 )
 
