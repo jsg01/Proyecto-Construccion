@@ -1,0 +1,60 @@
+orange:
+  x: 326
+  y: 125
+  w: 63
+  h: 62
+  R_min: 183.0
+  R_max: 250.0
+  G_min: 4.0
+  G_max: 55.0
+  mass: 3906
+blue:
+  x: 302
+  y: 220
+  w: 115
+  h: 54
+  R_min: 0.0
+  R_max: 16.0
+  G_min: 72.45000000000005
+  G_max: 100.0
+  mass: 6210
+white:
+  x: 304
+  y: 302
+  w: 183
+  h: 54
+  R_min: 84.0
+  R_max: 89.0
+  G_min: 82.0
+  G_max: 84.0
+  mass: 9882
+yellow:
+  x: 448
+  y: 221
+  w: 59
+  h: 57
+  R_min: 142.10000000000002
+  R_max: 168.0
+  G_min: 82.0
+  G_max: 106.0
+  mass: 3363
+green:
+  x: 412
+  y: 242
+  w: 46
+  h: 47
+  R_min: 63.0
+  R_max: 99.0
+  G_min: 108.05000000000001
+  G_max: 187.0
+  mass: 2162
+red:
+  x: 138
+  y: 124
+  w: 131
+  h: 64
+  R_min: 229.0
+  R_max: 255.0
+  G_min: 0.0
+  G_max: 10.0
+  mass: 8384

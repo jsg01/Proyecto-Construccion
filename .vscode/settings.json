@@ -1,0 +1,30 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/ricardo/Desktop/UPM/LABrobotica/Proyecto-Construccion/LabRob/build/detection_node",
+        "/home/ricardo/Desktop/UPM/LABrobotica/Proyecto-Construccion/LabRob/install/detection_node/lib/python3.10/site-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/ricardo/Desktop/UPM/LABrobotica/Proyecto-Construccion/LabRob/build/detection_node",
+        "/home/ricardo/Desktop/UPM/LABrobotica/Proyecto-Construccion/LabRob/install/detection_node/lib/python3.10/site-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ],
+    "cSpell.words": [
+        "arctan",
+        "Bgchannel",
+        "callbackgroup",
+        "Gimage",
+        "imgmsg",
+        "imread",
+        "imwrite",
+        "MINMAX",
+        "moveit",
+        "Nrchannel",
+        "OTSU",
+        "publishser",
+        "rviz",
+        "substs"
+    ]
+}

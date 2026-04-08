@@ -1,0 +1,14 @@
+TCP:
+  x: 0.0
+  y: 0.0
+  z: 0.0
+  roll: 0
+  pitch: 0
+  yaw: 0
+
+
+robot:
+  roll_base: 0.0
+  pitch_base: 0.0
+  yaw_base: 0.0
+
