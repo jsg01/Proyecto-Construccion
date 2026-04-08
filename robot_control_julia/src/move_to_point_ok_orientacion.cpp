@@ -70,7 +70,7 @@ int main(int argc, char ** argv)
 
     shape_msgs::msg::SolidPrimitive wall_primitive;
     wall_primitive.type = wall_primitive.BOX;
-    wall_primitive.dimensions = {0.02, 0.70, 0.80};
+    wall_primitive.dimensions = {0.02, 1.2, 0.80};
 
     geometry_msgs::msg::Pose wall_pose;
     wall_pose.orientation.w = 1.0;
