@@ -86,11 +86,11 @@ int main(int argc, char ** argv)
 
     double dx = target_pose.position.x - current_pose.position.x;
     double dy = target_pose.position.y - current_pose.position.y;
-    double dz = target_pose.position.z - current_pose.position.z;
+    double dz = std::abs(target_pose.position.z - current_pose.position.z);
     double dist = std::sqrt(dx * dx + dy * dy + dz * dz);
 
     // Si el movimiento es pequeño, usar cartesiano
-    if (dist < 0.1)
+    if (dist < 0.3 || dz < 0.02)
     {
         RCLCPP_INFO(node->get_logger(), "Movimiento CARTESIANO");
 
@@ -107,11 +107,34 @@ int main(int argc, char ** argv)
         );
 
         if (fraction < 0.9) {
-            RCLCPP_ERROR(node->get_logger(),
-                "No se pudo calcular trayectoria cartesiana completa (fraction=%.2f)", fraction);
+            RCLCPP_WARN(node->get_logger(),
+                "Trayectoria cartesiana incompleta (fraction=%.2f). Probando con movimiento JOINT...", fraction);
+
+            move_group.setPoseTarget(target_pose);
+
+            moveit::planning_interface::MoveGroupInterface::Plan plan;
+            bool ok = (move_group.plan(plan) == moveit::core::MoveItErrorCode::SUCCESS);
+
+            if (!ok) {
+                RCLCPP_ERROR(node->get_logger(), "Punto NO alcanzable");
+                rclcpp::shutdown();
+                spin_thread.join();
+                return 1;
+            }
+
+            RCLCPP_INFO(node->get_logger(), "Punto alcanzable con JOINT, ejecutando...");
+
+            auto exec_ok = move_group.execute(plan);
+
+            if (exec_ok == moveit::core::MoveItErrorCode::SUCCESS) {
+                RCLCPP_INFO(node->get_logger(), "Movimiento JOINT ejecutado correctamente");
+            } else {
+                RCLCPP_ERROR(node->get_logger(), "Error ejecutando movimiento JOINT");
+            }
+
             rclcpp::shutdown();
             spin_thread.join();
-            return 1;
+            return 0;
         }
 
         moveit::planning_interface::MoveGroupInterface::Plan plan;
