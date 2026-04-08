@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(robot_control)
+project(robot_control_julia)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -44,6 +44,14 @@ ament_target_dependencies(nodo90grados
   moveit_ros_planning_interface
 )
 
+add_executable(move_to_point_ok src/move_to_point_ok.cpp)
+
+ament_target_dependencies(move_to_point_ok
+  rclcpp
+  geometry_msgs
+  moveit_ros_planning_interface
+)
+
 add_executable(move_to_pose src/move_to_pose.cpp)
 
 ament_target_dependencies(move_to_pose
@@ -59,6 +67,7 @@ install(TARGETS
   pick_place
   nodo90grados
   move_to_pose
+  move_to_point_ok
   DESTINATION lib/${PROJECT_NAME}
 )
 

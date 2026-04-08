@@ -46,7 +46,7 @@ int main(int argc, char ** argv)
 
     std::this_thread::sleep_for(2s);
 
-    moveit::planning_interface::MoveGroupInterface move_group(node, "ur_manipulator");
+    moveit::planning_interface::MoveGroupInterface move_group(node, "ur3e");
 
     move_group.setMaxVelocityScalingFactor(0.10);
     move_group.setMaxAccelerationScalingFactor(0.08);
