@@ -58,6 +58,8 @@ public:
   {
     feedback_pub_ =
       this->create_publisher<std_msgs::msg::String>("/robot_feedback", 10);
+      
+    reached_pose_pub_ = this->create_publisher<std_msgs::msg::String>("/robot_pose_alcanzada", 10);
 
     named_pose_sub_ = this->create_subscription<std_msgs::msg::String>(
       "/ir_a_pose_guardada",
@@ -439,7 +441,10 @@ private:
             break;
           }
 
-          executeNamedJointLikeWorkingNode(it->second.joints);
+          bool ok = executeNamedJointLikeWorkingNode(it->second.joints);
+  	  if (ok) {
+            publishReachedPose(cmd.name);
+          }
           break;
         }
 
@@ -522,12 +527,20 @@ private:
     msg.data = text;
     feedback_pub_->publish(msg);
   }
-
+  
+  void publishReachedPose(const std::string & pose_name)
+  {
+    std_msgs::msg::String msg;
+    msg.data = pose_name;
+    reached_pose_pub_->publish(msg);
+  }
+  
 private:
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr named_pose_sub_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr simple_point_sub_;
   rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr pose_sub_;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr feedback_pub_;
+  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr reached_pose_pub_;
 
   std::map<std::string, NamedJointPose> named_poses_;
 

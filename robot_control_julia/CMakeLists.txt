@@ -73,14 +73,7 @@ ament_target_dependencies(move_to_pose
   tf2
 )
 
-add_executable(camera_collision_node src/camera_collision_node.cpp)
-ament_target_dependencies(camera_collision_node
-  rclcpp
-  geometry_msgs
-  moveit_msgs
-  shape_msgs
-  std_msgs
-)
+
 
 add_executable(movimiento_robot src/movimiento_robot.cpp)
 
@@ -103,7 +96,6 @@ install(TARGETS
   move_to_pose
   move_to_point_ok
   move_to_point_ok_orientacion
-  camera_collision_node
   movimiento_robot
   DESTINATION lib/${PROJECT_NAME}
 )

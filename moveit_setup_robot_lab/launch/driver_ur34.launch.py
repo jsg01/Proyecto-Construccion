@@ -99,6 +99,8 @@ def generate_launch_description():
             "fake_sensor_commands": fake_sensor_commands,
             "initial_joint_controller": initial_joint_controller,
             "activate_joint_controller": activate_joint_controller,
+            "description_package": "moveit_setup_robot_lab",
+            "description_file": "robot_lab.urdf.xacro",
         }.items(),
     )
 
