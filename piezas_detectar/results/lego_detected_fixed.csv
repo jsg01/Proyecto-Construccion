@@ -1,0 +1,9 @@
+piece_id,row,x1,y1,x2,y2,color,size_estimate
+T1,top,482,438,758,724,green,2x2
+T2,top,758,438,1045,724,green,2x2
+T3,top,1045,438,1348,724,white,2x2
+T4,top,1348,438,1791,724,white,2x3
+B1,bottom,249,724,642,901,white,2x3
+B2,bottom,642,724,1208,901,white,2x4
+B3,bottom,1208,724,1591,901,white,2x3
+B4,bottom,1591,724,1791,901,red,2x1

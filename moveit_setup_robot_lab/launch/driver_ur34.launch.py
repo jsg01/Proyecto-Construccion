@@ -42,7 +42,8 @@ def generate_launch_description():
         DeclareLaunchArgument(
             "robot_ip",
             #default_value="169.254.12.28",
-             default_value="192.168.56.101",
+            default_value="192.168.56.101",
+            #default_value="169.254.12.28",
             description="IP address by which the robot can be reached.",
         )
     )
@@ -100,6 +101,8 @@ def generate_launch_description():
             "fake_sensor_commands": fake_sensor_commands,
             "initial_joint_controller": initial_joint_controller,
             "activate_joint_controller": activate_joint_controller,
+            "description_package": "moveit_setup_robot_lab",
+            "description_file": "robot_lab.urdf.xacro",
         }.items(),
     )
 

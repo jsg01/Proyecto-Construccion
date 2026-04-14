@@ -23,8 +23,11 @@
         "moveit",
         "Nrchannel",
         "OTSU",
+        "pinza",
         "publishser",
+        "rgba",
         "rviz",
-        "substs"
+        "substs",
+        "xacro"
     ]
 }

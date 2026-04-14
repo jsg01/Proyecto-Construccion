@@ -90,8 +90,8 @@ def detect_color(imageRGI: np.array, image_normalized: np.array, yaml_path: str,
                 (g <= params['G_min']) | (g >= params['G_max'])
             )
             mask_uint8 = mask.astype(np.uint8) * 255
-            mask_uint8 = cv2.morphologyEx(mask_uint8, cv2.MORPH_OPEN, np.ones((100,100),np.uint8))
-            mask_uint8 = cv2.morphologyEx(mask_uint8, cv2.MORPH_CLOSE, np.ones((50,50),np.uint8))
+            mask_uint8 = cv2.morphologyEx(mask_uint8, cv2.MORPH_OPEN, np.ones((30,30),np.uint8))
+            mask_uint8 = cv2.morphologyEx(mask_uint8, cv2.MORPH_CLOSE, np.ones((10,10),np.uint8))
             mask = mask_uint8 > 0
             imageRGI[mask] = 0
             image_normalized[mask] = 0

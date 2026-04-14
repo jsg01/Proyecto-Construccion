@@ -1,0 +1,89 @@
+{
+  "pieces": [
+    {
+      "piece_id": "T1",
+      "row": "top",
+      "x1": 482,
+      "y1": 438,
+      "x2": 758,
+      "y2": 724,
+      "color": "green",
+      "size_estimate": "2x2"
+    },
+    {
+      "piece_id": "T2",
+      "row": "top",
+      "x1": 758,
+      "y1": 438,
+      "x2": 1045,
+      "y2": 724,
+      "color": "green",
+      "size_estimate": "2x2"
+    },
+    {
+      "piece_id": "T3",
+      "row": "top",
+      "x1": 1045,
+      "y1": 438,
+      "x2": 1348,
+      "y2": 724,
+      "color": "white",
+      "size_estimate": "2x2"
+    },
+    {
+      "piece_id": "T4",
+      "row": "top",
+      "x1": 1348,
+      "y1": 438,
+      "x2": 1791,
+      "y2": 724,
+      "color": "white",
+      "size_estimate": "2x3"
+    },
+    {
+      "piece_id": "B1",
+      "row": "bottom",
+      "x1": 249,
+      "y1": 724,
+      "x2": 642,
+      "y2": 901,
+      "color": "white",
+      "size_estimate": "2x3"
+    },
+    {
+      "piece_id": "B2",
+      "row": "bottom",
+      "x1": 642,
+      "y1": 724,
+      "x2": 1208,
+      "y2": 901,
+      "color": "white",
+      "size_estimate": "2x4"
+    },
+    {
+      "piece_id": "B3",
+      "row": "bottom",
+      "x1": 1208,
+      "y1": 724,
+      "x2": 1591,
+      "y2": 901,
+      "color": "white",
+      "size_estimate": "2x3"
+    },
+    {
+      "piece_id": "B4",
+      "row": "bottom",
+      "x1": 1591,
+      "y1": 724,
+      "x2": 1791,
+      "y2": 901,
+      "color": "red",
+      "size_estimate": "2x1"
+    }
+  ],
+  "guide": {
+    "top_y": 438,
+    "seam_y": 724,
+    "bottom_y": 901
+  }
+}
