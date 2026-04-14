@@ -1,3 +1,8 @@
+# Joints limits
+#
+# Ajustado para reducir configuraciones peligrosas con cámara montada
+# debajo del útil del UR3e.
+
 joint_limits:
   shoulder_pan_joint:
     has_acceleration_limits: false
@@ -5,9 +10,9 @@ joint_limits:
     has_position_limits: true
     has_velocity_limits: true
     max_effort: 54.0
-    max_position: 3.1415926536
+    max_position: 6.2831853072
     max_velocity: 3.1415926536
-    min_position: -3.1415926536
+    min_position: -6.2831853072
 
   shoulder_lift_joint:
     has_acceleration_limits: false
@@ -15,9 +20,9 @@ joint_limits:
     has_position_limits: true
     has_velocity_limits: true
     max_effort: 54.0
-    max_position: 0.5
+    max_position: 6.2831853072
     max_velocity: 3.1415926536
-    min_position: -3.0
+    min_position: -6.2831853072
 
   elbow_joint:
     has_acceleration_limits: false
@@ -25,9 +30,9 @@ joint_limits:
     has_position_limits: true
     has_velocity_limits: true
     max_effort: 28.0
-    max_position: 2.8
+    max_position: 3.1415926536
     max_velocity: 3.1415926536
-    min_position: -2.8
+    min_position: -3.1415926536
 
   wrist_1_joint:
     has_acceleration_limits: false
@@ -35,9 +40,9 @@ joint_limits:
     has_position_limits: true
     has_velocity_limits: true
     max_effort: 9.0
-    max_position: 3.1415926536
+    max_position: 3.14
     max_velocity: 6.2831853072
-    min_position: -3.1415926536
+    min_position: -3.14
 
   wrist_2_joint:
     has_acceleration_limits: false
@@ -45,9 +50,9 @@ joint_limits:
     has_position_limits: true
     has_velocity_limits: true
     max_effort: 9.0
-    max_position: 2.0
+    max_position: 1.7
     max_velocity: 6.2831853072
-    min_position: -2.0
+    min_position: -1.7
 
   wrist_3_joint:
     has_acceleration_limits: false

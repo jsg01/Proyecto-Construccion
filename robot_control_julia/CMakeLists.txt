@@ -10,6 +10,10 @@ find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
 find_package(tf2 REQUIRED)
+find_package(moveit_msgs REQUIRED)
+find_package(shape_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 
 
 add_executable(move_to_point src/move_to_point.cpp)
@@ -69,6 +73,28 @@ ament_target_dependencies(move_to_pose
   tf2
 )
 
+add_executable(camera_collision_node src/camera_collision_node.cpp)
+ament_target_dependencies(camera_collision_node
+  rclcpp
+  geometry_msgs
+  moveit_msgs
+  shape_msgs
+  std_msgs
+)
+
+add_executable(movimiento_robot src/movimiento_robot.cpp)
+
+ament_target_dependencies(movimiento_robot
+  rclcpp
+  moveit_ros_planning_interface
+  geometry_msgs
+  moveit_msgs
+  shape_msgs
+  std_msgs
+  tf2
+  tf2_geometry_msgs
+)
+
 install(TARGETS
   move_to_point
   move_pilz
@@ -77,6 +103,8 @@ install(TARGETS
   move_to_pose
   move_to_point_ok
   move_to_point_ok_orientacion
+  camera_collision_node
+  movimiento_robot
   DESTINATION lib/${PROJECT_NAME}
 )
 
