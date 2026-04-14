@@ -4,6 +4,8 @@
     
     <xacro:macro name="end_effector" params="
         parent:=tool0
+        
+        mesh_file_ee:=Assembly1
         description_package_ee:=moveit_setup_robot_lab
         roll:=0.0
         pitch:=0.0

@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://wiki.ros.org/xacro" name="robot_lab">
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="ur3e">
    <!-- import main macro -->
    <xacro:include filename="$(find ur_description)/urdf/ur_macro.xacro"/>
    <xacro:include filename="$(find moveit_setup_robot_lab)/urdf/end_effector.urdf.xacro"/>
+
    <!-- possible 'ur_type' values: ur3, ur3e, ur5, ur5e, ur7e, ur10, ur10e, ur12e, ur16e, ur20, ur30 -->
    <!-- the default value should raise an error in case this was called without defining the type -->
    <xacro:arg name="ur_type" default="ur3e"/>
@@ -57,11 +58,9 @@
    <!-- create link fixed to the "world" -->
    <link name="world" />
 
-  
-
    <!-- arm -->
    <xacro:ur_robot
-     name="robot_lab"
+     name="ur3e"
      tf_prefix="$(arg tf_prefix)"
      parent="world"
      joint_limits_parameters_file="$(arg joint_limit_params)"
@@ -102,12 +101,11 @@
 
    <xacro:end_effector 
           parent="tool0"
+          mesh_file_ee="Assembly1"
           description_package_ee="moveit_setup_robot_lab"
           roll="0.0"
           pitch="0.0"
           yaw="0.0"
-   /> 
-
-  
+          /> 
 
 </robot>

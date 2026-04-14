@@ -101,9 +101,9 @@ private:
   void loadNamedPoses()
   {
     named_poses_["PoseIntermedia"] = {{0.0, -1.57, 1.57, -1.57, -1.57, 0.0}};
-    named_poses_["DetectaTorre"] = {{0.2, -1.3, 1.8, -2.0, -1.57, 0.0}};
-    named_poses_["DetectaPiezasSueltas"] = {{0.4, -1.2, 1.7, -2.1, -1.57, 0.2}};
-    //falta añadir el detectaTorre y ver si añadimos más
+    named_poses_["DetectaTorre"] = {{0.7788,-0.0245,0.4485,-3.9326,0.8652,-0.1735}};
+    named_poses_["DetectaPiezasSueltas"] = {{-0.617,-1.7169,-0.9337,-2.0650,1.5690,0.9522}};
+
   }
 
   geometry_msgs::msg::Pose buildPose(double x, double y, double z, const std::string & modo, double yaw)
