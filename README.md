@@ -1,177 +1,87 @@
-# Proyecto-Construccion
+USO DE MOVIMIENTO_ROBOT
 
-**Proyecto de Construcción – Laboratorio de Robótica y Automática**
+El nodo movimiento_robot permite mover el UR3e de dos formas:
 
-This repository contains experiments and tools related to camera acquisition and ROS2 data collection for the robotics laboratory.
+A una pose predefinida por ángulos articulares.
+A un punto concreto en el espacio cartesiano.
 
----
+Además, añade automáticamente obstáculos estáticos al entorno de planificación:
 
-## Requirements
+una mesa
+una pared frontal
+Lanzamiento
 
-- Ubuntu 22.04
-- ROS2 Humble
+Primero lanza el robot, MoveIt y RViz:
 
-Make sure ROS2 is installed and sourced before running any commands.
+ros2 launch moveit_setup_robot_lab driver_ur34.launch.py use_fake_hardware:=true
+ros2 launch moveit_setup_robot_lab move_group.launch.py
+ros2 launch moveit_setup_robot_lab moveit_rviz.launch.py
 
-```bash
-source /opt/ros/humble/setup.bash
-```
+Después lanza el nodo de movimiento:
 
----
+ros2 launch robot_control_julia movimiento_robot.launch.py
 
-## USB Camera Setup (ROS2 Humble)
+Para ver el estado de ejecución:
 
-Update the system and install the USB camera driver:
+ros2 topic echo /robot_feedback
+1. Ir a una pose predefinida
 
-```bash
-sudo apt update
-sudo apt install ros-humble-usb-cam
-```
+Las poses predefinidas se definen en el código mediante los ángulos de las 6 articulaciones.
 
----
+Ejemplo de poses disponibles:
 
-## Running the Camera Node
+PoseIntermedia
+DetectaPiezas
+DetectaPiezasSueltas
+Ejemplo
+ros2 topic pub --once /ir_a_pose_guardada std_msgs/msg/String "{data: 'PoseIntermedia'}"
+ros2 topic pub --once /ir_a_pose_guardada std_msgs/msg/String "{data: 'DetectaPiezas'}"
+ros2 topic pub --once /ir_a_pose_guardada std_msgs/msg/String "{data: 'DetectaPiezasSueltas'}"
+2. Ir a un punto concreto
 
-Launch the USB camera node:
+Para enviar un objetivo cartesiano se usa el topic:
 
-```bash
-ros2 run usb_cam usb_cam_node_exe --ros-args -p video_device:=/dev/video2
-```
+/ir_a_punto_simple
 
-If your camera device is different, check available devices:
+El formato del mensaje es:
 
-<<<<<<< HEAD
-Para mover el robot a un punto (en simulacion):
+"x y z modo yaw"
 
-# Mover el robot en simulación a una posición con la herramienta hacia abajo a partir de las coordenadas de una pieza (por ahora ya dadas en el script)
-# Requisitos
+donde:
 
-Tener instalados:
+x y z son las coordenadas objetivo
+modo puede ser:
+down: herramienta hacia abajo
+front: herramienta hacia delante
+yaw es la rotación en radianes sobre el plano XY cuando se usa down
+Ejemplos
 
-- ROS 2 Humble
-- MoveIt 2
-- Universal Robots ROS 2 Driver
-- workspace compilado con `colcon`
-- usar los archivos .yaml de la carpeta config que he subido (en vez de los que vienen en Universal Robots ROS2 Driver, ya que hay parametros que he cambiado)
+Herramienta hacia abajo sin giro:
 
----
+ros2 topic pub --once /ir_a_punto_simple std_msgs/msg/String "{data: '0.25 0.0 0.20 down 0.0'}"
 
+Herramienta hacia abajo girada 90°:
 
-# Compilar y lanzar
+ros2 topic pub --once /ir_a_punto_simple std_msgs/msg/String "{data: '0.25 0.0 0.20 down 1.57'}"
 
-Desde el workspace:
+Herramienta hacia delante:
 
-```bash
-source /opt/ros/humble/setup.bash
-cd ~/robotica_ws
-colcon build --packages-select robot_control
-source install/setup.bash
+ros2 topic pub --once /ir_a_punto_simple std_msgs/msg/String "{data: '0.20 0.10 0.18 front 0.0'}"
+3. Enviar una pose completa
 
+También se puede enviar una pose completa usando PoseStamped en el topic:
 
-#Lanzar la simulación
-#Terminal 1
-source /opt/ros/humble/setup.bash
-source ~/robotica_ws/install/setup.bash
-ros2 launch ur_robot_driver ur_control.launch.py ur_type:=ur3e robot_ip:=192.168.56.101 use_fake_hardware:=true initial_joint_controller:=joint_trajectory_controller launch_rviz:=false
-
-#Terminal 2
-source /opt/ros/humble/setup.bash
-source ~/robotica_ws/install/setup.bash
-ros2 launch ur_moveit_config ur_moveit.launch.py ur_type:=ur3e launch_rviz:=true
-
-#Terminal 3
-source /opt/ros/humble/setup.bash
-source ~/robotica_ws/install/setup.bash
-ros2 launch robot_control move_to_pose.launch.py
-
-
-
-#NOTAS:
-Notas importantes
-La simulación se ejecuta con use_fake_hardware:=true, por lo que no hace falta tener el robot real conectado.
-Es importante lanzar primero:
-ur_control.launch.py
-ur_moveit.launch.py
-el nodo de robot_control
-El controlador usado en simulación debe ser joint_trajectory_controller.
-=======
-```bash
-ls /dev/video*
-```
-
----
-
-## Viewing the Camera Stream
-
-You can visualize the camera feed using **rqt_image_view**:
-
-```bash
-ros2 run rqt_image_view rqt_image_view
-```
-
-Then select the topic:
-
-```
-/image_raw
-```
-
-Alternatively, you can visualize the stream in **RViz2**:
-
-```bash
-rviz2
-```
-
-Add an **Image** or **Camera** display and select the corresponding topic.
-
----
-
-## ROSBAG Files
-
-This repository contains recorded ROS2 datasets used for testing and debugging.
-The Rosbag files can be found: https://drive.google.com/drive/folders/1X39_cXXQb7YtfracFyYDbJilWbTsT5vm?usp=drive_link
-```
-.
-├── Elenas_video
-│   ├── metadata.yaml
-│   └── rosbag2_2026_03_12-17_50_01_0.mcap
-│
-└── Ricardo_image
-    └── rosbag2_all_topics
-        ├── metadata.yaml
-        └── rosbag2_2026_03_13-04_38_21_0.db3
-```
-
----
-
-## Playing a Rosbag
-
-To replay a rosbag:
-
-```bash
-ros2 bag play <rosbag_folder>
-```
-
-Example:
-
-```bash
-ros2 bag play Elenas_video
-```
-
----
-
-## Recording a Rosbag
-
-Record all available topics:
-
-```bash
-ros2 bag record -a
-```
-
-Record only specific topics:
-
-```bash
-ros2 bag record /image_raw
-```
-
----
->>>>>>> origin/Ricardo
+/ir_a_punto_pose
+Ejemplo
+ros2 topic pub --once /ir_a_punto_pose geometry_msgs/msg/PoseStamped "{
+  header: {frame_id: 'base_link'},
+  pose: {
+    position: {x: 0.25, y: 0.0, z: 0.20},
+    orientation: {x: 1.0, y: 0.0, z: 0.0, w: 0.0}
+  }
+}"
+Notas
+Las poses predefinidas se ejecutan por ángulos articulares.
+Los puntos concretos se ejecutan por objetivo cartesiano.
+El nodo decide automáticamente si usar movimiento cartesiano o joint según la distancia al objetivo.
+Si un movimiento no puede planificarse, se publica un mensaje de error en /robot_feedback.
