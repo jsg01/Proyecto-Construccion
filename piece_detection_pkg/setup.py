@@ -15,16 +15,12 @@ setup(
     zip_safe=True,
     maintainer='paula',
     maintainer_email='paula@todo.todo',
-    description='TODO: Package description',
+    description='Detección de piezas sueltas con integración de calibración',
     license='TODO: License declaration',
-    extras_require={
-        'test': [
-            'pytest',
+    tests_require=['pytest'],
+    entry_points={
+        'console_scripts': [
+            'piece_detection_node = piece_detection_pkg.piece_detection_node:main',
         ],
     },
-    entry_points={
-    'console_scripts': [
-        'piece_detection_node_final = piece_detection_pkg.piece_detection_node_final:main',
-    ],
-},
 )

@@ -1,4 +1,17 @@
+# ROS2 build
 build/
 install/
 log/
+
+# Python
 __pycache__/
+*.pyc
+*.pyo
+
+# Imágenes de pruebas (opcional)
+*.png
+*.jpg
+*.jpeg
+
+# VSCode / otros
+.vscode/

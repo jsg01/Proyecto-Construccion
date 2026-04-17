@@ -37,13 +37,13 @@ class PlaneTransformServer(Node):
 
         self.robot_srv = self.create_service(
             RobotToPixel,
-            "robot_to_pixel",
+            "robot_to_pixel_plane",
             self.handle_robot_to_pixel,
         )
 
         self.get_logger().info(f"Homografía cargada desde: {plane_yaml}")
         self.get_logger().info("Servicio /pixel_to_robot_plane listo")
-        self.get_logger().info("Servicio /robot_to_pixel listo")
+        self.get_logger().info("Servicio /robot_to_pixel_plane listo")
 
     def load_homography(self, yaml_path: str) -> np.ndarray:
         if not os.path.exists(yaml_path):
