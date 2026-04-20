@@ -100,7 +100,7 @@ public:
 private:
   void loadNamedPoses()
   {
-    named_poses_["PoseIntermedia"] = {{0.0, -1.57, 1.57, -1.57, -1.57, 0.0}};
+    named_poses_["PoseIntermedia"] = {{-3.12,-1.7160,-0.9334,-2.0651,1.5688,0.9521}};
     named_poses_["DetectaTorre"] = {{0.7788,-0.0245,0.4485,-3.9326,0.8652,-0.1735}};
     named_poses_["DetectaPiezasSueltas"] = {{-0.617,-1.7169,-0.9337,-2.0650,1.5690,0.9522}};
 
