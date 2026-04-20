@@ -14,6 +14,7 @@ find_package(moveit_msgs REQUIRED)
 find_package(shape_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
+find_package(construccion_interfaces REQUIRED)
 
 
 add_executable(move_to_point src/move_to_point.cpp)
@@ -86,6 +87,7 @@ ament_target_dependencies(movimiento_robot
   std_msgs
   tf2
   tf2_geometry_msgs
+  construccion_interfaces
 )
 
 install(TARGETS

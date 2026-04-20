@@ -20,9 +20,13 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <functional>
 
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+
+#include "construccion_interfaces/srv/move_named_pose.hpp"
+#include "construccion_interfaces/srv/move_cartesian.hpp"
 
 using namespace std::chrono_literals;
 
@@ -56,6 +60,17 @@ public:
   MovimientoRobot()
   : Node("movimiento_robot")
   {
+
+    named_pose_srv_ = this->create_service<construccion_interfaces::srv::MoveNamedPose>(
+    "/move_named_pose",
+    std::bind(&MovimientoRobot::moveNamedPoseService, this,
+            std::placeholders::_1, std::placeholders::_2));
+
+    cartesian_srv_ = this->create_service<construccion_interfaces::srv::MoveCartesian>(
+      "/move_cartesian",
+      std::bind(&MovimientoRobot::moveCartesianService, this,
+                std::placeholders::_1, std::placeholders::_2));
+
     feedback_pub_ =
       this->create_publisher<std_msgs::msg::String>("/robot_feedback", 10);
       
@@ -80,7 +95,7 @@ public:
 
     worker_thread_ = std::thread(&MovimientoRobot::workerLoop, this);
 
-    RCLCPP_INFO(this->get_logger(), "movimiento_robot listo para recibir comandos");
+    RCLCPP_INFO(this->get_logger(), "movimiento_robot listo: topics y servicios activos");
     publishFeedback("movimiento_robot listo");
   }
 
@@ -477,6 +492,34 @@ private:
     enqueueCommand(cmd);
   }
 
+  void moveNamedPoseService(
+  const std::shared_ptr<construccion_interfaces::srv::MoveNamedPose::Request> request,
+  std::shared_ptr<construccion_interfaces::srv::MoveNamedPose::Response> response)
+  {
+  auto it = named_poses_.find(request->pose_name);
+  if (it == named_poses_.end()) {
+    response->success = false;
+    response->message = "Pose desconocida";
+    return;
+  }
+
+  bool ok = executeNamedJointLikeWorkingNode(it->second.joints);
+  response->success = ok;
+  response->message = ok ? "Pose ejecutada correctamente" : "Fallo ejecutando pose";
+  }
+
+  void moveCartesianService(
+  const std::shared_ptr<construccion_interfaces::srv::MoveCartesian::Request> request,
+  std::shared_ptr<construccion_interfaces::srv::MoveCartesian::Response> response)
+  {
+  double yaw_rad = request->yaw_deg * M_PI / 180.0;
+  auto target_pose = buildPose(request->x, request->y, request->z, request->modo, yaw_rad);
+
+  bool ok = executeLikeWorkingNode(target_pose);
+  response->success = ok;
+  response->message = ok ? "Movimiento cartesiano ejecutado" : "Fallo en movimiento cartesiano";
+  }
+
   void simplePointCallback(const std_msgs::msg::String::SharedPtr msg)
   {
     std::istringstream iss(msg->data);
@@ -541,6 +584,8 @@ private:
   rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr pose_sub_;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr feedback_pub_;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr reached_pose_pub_;
+  rclcpp::Service<construccion_interfaces::srv::MoveNamedPose>::SharedPtr named_pose_srv_;
+  rclcpp::Service<construccion_interfaces::srv::MoveCartesian>::SharedPtr cartesian_srv_;
 
   std::map<std::string, NamedJointPose> named_poses_;
 
