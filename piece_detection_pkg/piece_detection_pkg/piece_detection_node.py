@@ -3,6 +3,7 @@ import json
 import cv2
 import numpy as np
 import rclpy
+
 from rclpy.node import Node
 from sensor_msgs.msg import Image
 from std_msgs.msg import String
@@ -20,7 +21,6 @@ class LoosePieceDetectionNode(Node):
         self.declare_parameter('output_topic', '/loose_pieces')
         self.declare_parameter('feedback_topic', '/robot_phase_feedback')
         self.declare_parameter('command_topic', '/vision_phase_command')
-
         self.declare_parameter('detect_pose_name', 'DetectaPiezasSueltas')
 
         self.declare_parameter('bg_threshold', 0.08)
@@ -81,13 +81,10 @@ class LoosePieceDetectionNode(Node):
         self.foreground_publisher = self.create_publisher(Image, '/foreground_loose', 10)
         self.command_publisher = self.create_publisher(String, command_topic, 10)
 
-        # Cliente del servicio pixel -> robot
         self.pixel_to_robot_client = self.create_client(
             PixelToRobot,
             '/pixel_to_robot_plane'
         )
-
-        # Cliente del servicio robot -> pixel
         self.robot_to_pixel_client = self.create_client(
             RobotToPixel,
             '/robot_to_pixel_plane'
@@ -100,6 +97,8 @@ class LoosePieceDetectionNode(Node):
             self.get_logger().info('Esperando servicio /robot_to_pixel_plane...')
 
         self.latest_frame = None
+        self.latest_header = None
+
         self.background_rgi = None
         self.background_ready = False
         self.robot_at_detect_pose = False
@@ -107,6 +106,21 @@ class LoosePieceDetectionNode(Node):
         self.snapshot_taken = False
         self.processed_once = False
         self.pose_request_sent = False
+        self.processing_snapshot = False
+
+        self.pending_frame_bgr = None
+        self.pending_header = None
+        self.pending_fg_mask = None
+        self.pending_separated_mask = None
+        self.pending_detections = []
+        self.pending_index = 0
+        self.pending_pieces_out = []
+        self.pending_detections_with_robot = []
+
+        self.current_piece_data = None
+        self.current_det_with_robot = None
+
+        self.timer = self.create_timer(0.1, self.timer_callback)
 
         self.publish_go_to_pose(self.detect_pose_name)
 
@@ -153,12 +167,8 @@ class LoosePieceDetectionNode(Node):
 
         if at_detect_pose and not self.robot_at_detect_pose:
             self.robot_at_detect_pose = True
-            self.get_logger().info(
-                f'Robot confirmado en pose {self.detect_pose_name}.'
-            )
-            self.get_logger().info(
-                'Ahora deja la mesa vacía y pulsa b para guardar el fondo.'
-            )
+            self.get_logger().info(f'Robot confirmado en pose {self.detect_pose_name}.')
+            self.get_logger().info('Ahora deja la mesa vacía y pulsa b para guardar el fondo.')
 
     def rgb_to_rgi(self, bgr_img):
         rgb = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2RGB).astype(np.float32)
@@ -184,7 +194,9 @@ class LoosePieceDetectionNode(Node):
         self.background_ready = True
         self.snapshot_taken = False
         self.processed_once = False
-        self.get_logger().info('Fondo vacío capturado correctamente en la pose DetectaPiezasSueltas.')
+        self.get_logger().info(
+            'Fondo vacío capturado correctamente en la pose DetectaPiezasSueltas.'
+        )
 
     def subtract_background(self, frame_bgr):
         frame_rgi = self.rgb_to_rgi(frame_bgr)
@@ -287,10 +299,8 @@ class LoosePieceDetectionNode(Node):
 
         if med_v < 40:
             return 'unknown'
-
         if med_s < 35:
             return 'neutral'
-
         if med_h < 8 or med_h >= 170:
             return 'red'
         if 8 <= med_h < 22:
@@ -318,7 +328,6 @@ class LoosePieceDetectionNode(Node):
             area = cv2.contourArea(cnt)
             if area < self.min_area:
                 continue
-
             if area > self.max_area_ratio * img_area:
                 continue
 
@@ -377,56 +386,88 @@ class LoosePieceDetectionNode(Node):
                 'color': color,
                 'contour': cnt_smooth,
             })
-
             det_id += 1
 
         return detections
 
-    def pixel_to_robot(self, u, v):
-        req = PixelToRobot.Request()
-        req.u = float(u)
-        req.v = float(v)
+    def on_pixel_to_robot_done(self, future):
+        try:
+            result = future.result()
+        except Exception as e:
+            self.get_logger().error(f'Error llamando a /pixel_to_robot_plane: {e}')
+            self.store_current_detection_and_continue()
+            return
 
-        future = self.pixel_to_robot_client.call_async(req)
-        rclpy.spin_until_future_complete(self, future)
-
-        result = future.result()
         if result is None:
             self.get_logger().error('El servicio /pixel_to_robot_plane no devolvió respuesta.')
-            return None
+            self.store_current_detection_and_continue()
+            return
 
         if not result.success:
-            self.get_logger().error(f'Error en calibración directa: {result.message}')
-            return None
+            self.get_logger().error(f'Error en calibración: {result.message}')
+            self.store_current_detection_and_continue()
+            return
 
-        return {
-            'x': float(result.x),
-            'y': float(result.y),
-            'z': float(result.z),
-        }
+        self.current_piece_data['robot_x'] = float(result.x)
+        self.current_piece_data['robot_y'] = float(result.y)
 
-    def robot_to_pixel(self, x, y, z):
+        self.current_det_with_robot['robot_x'] = float(result.x)
+        self.current_det_with_robot['robot_y'] = float(result.y)
+
+        self.get_logger().info(
+            f'PixelToRobot: pixel=({self.current_piece_data["cx"]},{self.current_piece_data["cy"]}) '
+            f'-> robot=({result.x:.6f}, {result.y:.6f})'
+        )
+
         req = RobotToPixel.Request()
-        req.x = float(x)
-        req.y = float(y)
-        req.z = float(z)
+        req.x = float(result.x)
+        req.y = float(result.y)
+        
+        future2 = self.robot_to_pixel_client.call_async(req)
+        future2.add_done_callback(self.on_robot_to_pixel_done)
 
-        future = self.robot_to_pixel_client.call_async(req)
-        rclpy.spin_until_future_complete(self, future)
+    def on_robot_to_pixel_done(self, future):
+        try:
+            result = future.result()
+        except Exception as e:
+            self.get_logger().error(f'Error llamando a /robot_to_pixel_plane: {e}')
+            self.store_current_detection_and_continue()
+            return
 
-        result = future.result()
         if result is None:
             self.get_logger().error('El servicio /robot_to_pixel_plane no devolvió respuesta.')
-            return None
+            self.store_current_detection_and_continue()
+            return
 
         if not result.success:
-            self.get_logger().error(f'Error en calibración inversa: {result.message}')
-            return None
+            self.get_logger().error(f'Error en proyección inversa: {result.message}')
+            self.store_current_detection_and_continue()
+            return
 
-        return {
-            'u': float(result.u),
-            'v': float(result.v),
-        }
+        u = float(result.u)
+        v = float(result.v)
+
+        self.current_piece_data['reproj_u'] = u
+        self.current_piece_data['reproj_v'] = v
+
+        self.current_det_with_robot['reproj_u'] = u
+        self.current_det_with_robot['reproj_v'] = v
+
+        reproj_error = np.hypot(
+            u - self.current_piece_data['cx'],
+            v - self.current_piece_data['cy']
+        )
+
+        self.get_logger().info(
+            f'RobotToPixel: robot=({self.current_piece_data["robot_x"]:.6f}, '
+            f'{self.current_piece_data["robot_y"]:.6f}) -> reproy=({u:.2f}, {v:.2f}) '
+            f'error={reproj_error:.2f}px'
+        )
+
+        self.current_piece_data['reproj_error_px'] = float(reproj_error)
+        self.current_det_with_robot['reproj_error_px'] = float(reproj_error)
+
+        self.store_current_detection_and_continue()
 
     def draw_detections(self, frame_bgr, detections):
         vis = frame_bgr.copy()
@@ -502,11 +543,17 @@ class LoosePieceDetectionNode(Node):
             self.get_logger().error(f'Error convirtiendo foreground: {e}')
             return
 
-        msg_out.header.stamp = header.stamp
-        msg_out.header.frame_id = header.frame_id
+        if header is not None:
+            msg_out.header.stamp = header.stamp
+            msg_out.header.frame_id = header.frame_id
+
         self.foreground_publisher.publish(msg_out)
 
     def process_snapshot(self, frame_bgr, header):
+        self.get_logger().info(
+            f'Procesando snapshot con resolucion={frame_bgr.shape[1]}x{frame_bgr.shape[0]}'
+        )
+
         fg_mask = self.subtract_background(frame_bgr)
         fg_mask = self.clean_mask(fg_mask)
         fg_mask = self.remove_border_noise(fg_mask)
@@ -514,104 +561,118 @@ class LoosePieceDetectionNode(Node):
 
         separated_mask = self.split_touching_pieces(fg_mask)
         detections = self.extract_blobs(separated_mask, frame_bgr)
+        self.get_logger().info(
+            f'Se han detectado {len(detections)} blobs candidatos.'
+        )
 
-        pieces_out = []
-        detections_with_robot = []
+        self.pending_frame_bgr = frame_bgr
+        self.pending_header = header
+        self.pending_fg_mask = fg_mask
+        self.pending_separated_mask = separated_mask
+        self.pending_detections = detections
+        self.pending_index = 0
+        self.pending_pieces_out = []
+        self.pending_detections_with_robot = []
 
-        for det in detections:
-            robot_point = self.pixel_to_robot(det['cx'], det['cy'])
+        if len(detections) == 0:
+            self.finish_snapshot_processing()
+            return
 
-            piece_data = {
-                'id': det['id'],
-                'x': det['x'],
-                'y': det['y'],
-                'w': det['w'],
-                'h': det['h'],
-                'pick_cx': det['cx'],
-                'pick_cy': det['cy'],
-                'cx': det['cx'],
-                'cy': det['cy'],
-                'area': det['area'],
-                'angle_deg': det['angle_deg'],
-                'size_class': det['size_class'],
-                'color': det['color'],
-            }
+        self.process_next_detection()
 
-            det_with_robot = det.copy()
+    def process_next_detection(self):
+        if self.pending_index >= len(self.pending_detections):
+            self.finish_snapshot_processing()
+            return
 
-            if robot_point is not None:
-                piece_data['robot_x'] = robot_point['x']
-                piece_data['robot_y'] = robot_point['y']
-                piece_data['robot_z'] = robot_point['z']
+        det = self.pending_detections[self.pending_index]
 
-                det_with_robot['robot_x'] = robot_point['x']
-                det_with_robot['robot_y'] = robot_point['y']
-                det_with_robot['robot_z'] = robot_point['z']
+        piece_data = {
+            'id': det['id'],
+            'x': det['x'],
+            'y': det['y'],
+            'w': det['w'],
+            'h': det['h'],
+            'pick_cx': det['cx'],
+            'pick_cy': det['cy'],
+            'cx': det['cx'],
+            'cy': det['cy'],
+            'area': det['area'],
+            'angle_deg': det['angle_deg'],
+            'size_class': det['size_class'],
+            'color': det['color'],
+            'robot_x': None,
+            'robot_y': None,
+            'robot_z': None,
+            'reproj_u': None,
+            'reproj_v': None,
+            'reproj_error_px': None,
+        }
 
-                reprojected_point = self.robot_to_pixel(
-                    robot_point['x'],
-                    robot_point['y'],
-                    robot_point['z']
-                )
+        det_with_robot = det.copy()
+        det_with_robot['robot_x'] = None
+        det_with_robot['robot_y'] = None
+        det_with_robot['robot_z'] = None
+        det_with_robot['reproj_u'] = None
+        det_with_robot['reproj_v'] = None
+        det_with_robot['reproj_error_px'] = None
 
-                if reprojected_point is not None:
-                    piece_data['reproj_u'] = reprojected_point['u']
-                    piece_data['reproj_v'] = reprojected_point['v']
+        self.current_piece_data = piece_data
+        self.current_det_with_robot = det_with_robot
 
-                    det_with_robot['reproj_u'] = reprojected_point['u']
-                    det_with_robot['reproj_v'] = reprojected_point['v']
+        req = PixelToRobot.Request()
+        req.u = float(det['cx'])
+        req.v = float(det['cy'])
 
-                    reproj_error = np.hypot(
-                        reprojected_point['u'] - det['cx'],
-                        reprojected_point['v'] - det['cy']
-                    )
+        self.get_logger().info(
+            f'Pieza {det["id"]}: bbox=({det["x"]},{det["y"]},{det["w"]},{det["h"]}) '
+            f'centro_detectado=({det["cx"]},{det["cy"]}) '
+            f'area={det["area"]:.1f} angle={det["angle_deg"]:.1f} '
+            f'color={det["color"]} size={det["size_class"]}'
+        )
 
-                    piece_data['reproj_error_px'] = float(reproj_error)
-                    det_with_robot['reproj_error_px'] = float(reproj_error)
-                else:
-                    piece_data['reproj_u'] = None
-                    piece_data['reproj_v'] = None
-                    piece_data['reproj_error_px'] = None
+        future = self.pixel_to_robot_client.call_async(req)
+        future.add_done_callback(self.on_pixel_to_robot_done)
 
-                    det_with_robot['reproj_u'] = None
-                    det_with_robot['reproj_v'] = None
-                    det_with_robot['reproj_error_px'] = None
+    def store_current_detection_and_continue(self):
+        self.pending_pieces_out.append(self.current_piece_data)
+        self.pending_detections_with_robot.append(self.current_det_with_robot)
 
-            else:
-                piece_data['robot_x'] = None
-                piece_data['robot_y'] = None
-                piece_data['robot_z'] = None
-                piece_data['reproj_u'] = None
-                piece_data['reproj_v'] = None
-                piece_data['reproj_error_px'] = None
+        self.pending_index += 1
+        self.process_next_detection()
 
-                det_with_robot['robot_x'] = None
-                det_with_robot['robot_y'] = None
-                det_with_robot['robot_z'] = None
-                det_with_robot['reproj_u'] = None
-                det_with_robot['reproj_v'] = None
-                det_with_robot['reproj_error_px'] = None
-
-            pieces_out.append(piece_data)
-            detections_with_robot.append(det_with_robot)
-
-        annotated = self.draw_detections(frame_bgr, detections_with_robot)
+    def finish_snapshot_processing(self):
+        annotated = self.draw_detections(
+            self.pending_frame_bgr,
+            self.pending_detections_with_robot
+        )
 
         payload = {
             'phase': 'loose_pieces_ready',
-            'image_width': int(frame_bgr.shape[1]),
-            'image_height': int(frame_bgr.shape[0]),
-            'pieces': pieces_out
+            'image_width': int(self.pending_frame_bgr.shape[1]),
+            'image_height': int(self.pending_frame_bgr.shape[0]),
+            'pieces': self.pending_pieces_out
         }
 
         out_msg = String()
         out_msg.data = json.dumps(payload)
         self.publisher.publish(out_msg)
 
-        self.get_logger().info(f'Foto procesada. Publicadas {len(pieces_out)} piezas sueltas.')
+        for piece in self.pending_pieces_out:
+            self.get_logger().info(
+                f'RESULTADO FINAL pieza {piece["id"]}: '
+                f'pixel=({piece["cx"]},{piece["cy"]}) '
+                f'robot=({piece["robot_x"]}, {piece["robot_y"]}) '
+                f'reproy=({piece["reproj_u"]}, {piece["reproj_v"]}) '
+                f'err={piece["reproj_error_px"]}'
+            )
+
+        self.get_logger().info(
+            f'Foto procesada. Publicadas {len(self.pending_pieces_out)} piezas sueltas.'
+        )
 
         if self.save_snapshot:
-            cv2.imwrite(self.snapshot_path, frame_bgr)
+            cv2.imwrite(self.snapshot_path, self.pending_frame_bgr)
             self.get_logger().info(f'Foto guardada en: {self.snapshot_path}')
 
         if self.save_annotated:
@@ -619,14 +680,37 @@ class LoosePieceDetectionNode(Node):
             self.get_logger().info(f'Imagen anotada guardada en: {self.annotated_path}')
 
         if self.show_debug:
-            cv2.imshow('Loose pieces snapshot', frame_bgr)
-            cv2.imshow('Loose pieces foreground', fg_mask)
-            cv2.imshow('Loose pieces separated', separated_mask)
+            cv2.imshow('Loose pieces snapshot', self.pending_frame_bgr)
+            cv2.imshow('Loose pieces foreground', self.pending_fg_mask)
+            cv2.imshow('Loose pieces separated', self.pending_separated_mask)
             cv2.imshow('Loose pieces detections', annotated)
             cv2.waitKey(1)
 
         self.snapshot_taken = True
         self.processed_once = True
+        self.processing_snapshot = False
+
+        self.current_piece_data = None
+        self.current_det_with_robot = None
+
+    def timer_callback(self):
+        if self.processing_snapshot:
+            return
+
+        if self.snapshot_requested and not self.processed_once:
+            if self.latest_frame is None:
+                self.get_logger().warn('No hay frame disponible todavía para procesar.')
+                return
+
+            self.processing_snapshot = True
+            self.snapshot_requested = False
+
+            try:
+                self.get_logger().info('Procesando snapshot fuera del callback de imagen...')
+                self.process_snapshot(self.latest_frame.copy(), self.latest_header)
+            except Exception as e:
+                self.processing_snapshot = False
+                self.get_logger().error(f'Error procesando snapshot: {e}')
 
     def image_callback(self, msg):
         try:
@@ -636,6 +720,11 @@ class LoosePieceDetectionNode(Node):
             return
 
         self.latest_frame = frame.copy()
+        self.latest_header = msg.header
+
+        self.get_logger().info(
+            f'Frame recibido: resolucion={frame.shape[1]}x{frame.shape[0]}'
+        )
 
         if self.show_debug:
             preview = frame.copy()
@@ -659,7 +748,6 @@ class LoosePieceDetectionNode(Node):
                 y0 += 30
 
             cv2.imshow('Loose pieces live preview', preview)
-
             key = cv2.waitKey(1) & 0xFF
 
             if key == ord('b'):
@@ -673,6 +761,8 @@ class LoosePieceDetectionNode(Node):
             elif key == ord('r'):
                 self.snapshot_taken = False
                 self.processed_once = False
+                self.snapshot_requested = False
+                self.processing_snapshot = False
                 self.get_logger().info('Reset hecho. Manteniendo el fondo actual.')
 
             elif key == ord('p'):
@@ -684,13 +774,11 @@ class LoosePieceDetectionNode(Node):
                     self.get_logger().warn(
                         'Primero captura el fondo vacio con la tecla b.'
                     )
+                elif self.processing_snapshot:
+                    self.get_logger().warn('Ya hay un snapshot en proceso.')
                 else:
                     self.snapshot_requested = True
-                    self.get_logger().info('Foto solicitada con tecla p. Procesando frame congelado...')
-
-        if self.snapshot_requested and not self.processed_once:
-            self.snapshot_requested = False
-            self.process_snapshot(frame.copy(), msg.header)
+                    self.get_logger().info('Foto solicitada con tecla p.')
 
     def destroy_node(self):
         cv2.destroyAllWindows()
@@ -700,6 +788,7 @@ class LoosePieceDetectionNode(Node):
 def main(args=None):
     rclpy.init(args=args)
     node = LoosePieceDetectionNode()
+
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:
