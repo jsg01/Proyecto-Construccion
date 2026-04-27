@@ -55,7 +55,7 @@ joint_limits:
     has_position_limits: true
     has_velocity_limits: true
     max_effort: 9.0
-    max_position: 6.2831853072
+    max_position: 0
     max_velocity: 6.2831853072
     min_position: -6.2831853072
   wrist_2_joint:

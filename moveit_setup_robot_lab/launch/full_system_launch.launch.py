@@ -1,42 +1,69 @@
-import os
-from ament_index_python.packages import get_package_share_directory
-
 from launch import LaunchDescription
+from launch.actions import IncludeLaunchDescription, TimerAction, ExecuteProcess
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-
-from launch.actions import (
-    DeclareLaunchArgument,
-    IncludeLaunchDescription,
-)
 from launch.substitutions import LaunchConfiguration
+from launch_ros.substitutions import FindPackageShare
 
 
 def generate_launch_description():
-   ld = LaunchDescription()
-   ld.add_action(
-        DeclareLaunchArgument(
-            "use_fake_hardware",
-            default_value="false",
-            description="Use fake hardware for simulation or not.",
-        )
-   )
-   ld.add_action(
-      DeclareLaunchArgument(
-         "robot_ip", 
-         description="IP address by which the robot can be reached.",
-         default_value="192.168.0.20"
-      )
-   )
-   robot_ip = LaunchConfiguration("robot_ip")
-   use_fake_hardware = LaunchConfiguration("use_fake_hardware")
-   simulation_robot_control_launch = IncludeLaunchDescription(
-      PythonLaunchDescriptionSource([os.path.join(
-         get_package_share_directory('moveit_setup_robot_lab'), 'launch'),
-         '/official_moveit_launch.launch.py']),
-      launch_arguments={
-            "use_fake_hardware": use_fake_hardware,
-            "robot_ip": robot_ip,
-         }.items()
-   )
-   ld.add_action(simulation_robot_control_launch)
-   return ld
+
+    use_fake_hardware = LaunchConfiguration("use_fake_hardware")
+
+    pkg = FindPackageShare("moveit_setup_robot_lab")
+
+    # 1️⃣ Launch UR driver
+    driver = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            [pkg, "/launch/driver_ur34.launch.py"]
+        ),
+        launch_arguments={
+            "use_fake_hardware": use_fake_hardware
+        }.items()
+    )
+
+    # 2️⃣ Load controller
+    load_controller = ExecuteProcess(
+        cmd=[
+            "ros2", "control", "load_controller",
+            "--set-state", "active",
+            "scaled_joint_trajectory_controller"
+        ],
+        output="screen"
+    )
+
+    # 3️⃣ Launch move_group (after delay)
+    move_group = TimerAction(
+        period=3.0,
+        actions=[
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(
+                    [pkg, "/launch/move_group.launch.py"]
+                )
+            )
+        ]
+    )
+
+    # 4️⃣ Launch RViz (after delay)
+    rviz = TimerAction(
+        period=5.0,
+        actions=[
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(
+                    [pkg, "/launch/moveit_rviz.launch.py"]
+                )
+            )
+        ]
+    )
+
+    # 5️⃣ Delay controller load slightly (important)
+    delayed_controller = TimerAction(
+        period=2.0,
+        actions=[load_controller]
+    )
+
+    return LaunchDescription([
+        driver,
+        delayed_controller,
+        move_group,
+        rviz
+    ])
