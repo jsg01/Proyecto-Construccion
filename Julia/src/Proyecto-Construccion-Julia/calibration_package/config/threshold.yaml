@@ -1,0 +1,35 @@
+colors:
+  red:
+    R_min: 90
+    R_max: 180
+    G_min: 20
+    G_max: 90
+    min_area: 300
+
+  green:
+    R_min: 20
+    R_max: 110
+    G_min: 80
+    G_max: 180
+    min_area: 300
+
+  blue:
+    R_min: 10
+    R_max: 90
+    G_min: 20
+    G_max: 120
+    min_area: 300
+
+  yellow:
+    R_min: 100
+    R_max: 180
+    G_min: 100
+    G_max: 180
+    min_area: 300
+
+  orange:
+    R_min: 120
+    R_max: 200
+    G_min: 60
+    G_max: 140
+    min_area: 300

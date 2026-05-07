@@ -1,7 +1,7 @@
 # ROS2 build
-*/build
-*/install
-*/log
+build/
+install/
+log/
 
 # Python
 __pycache__/
@@ -15,6 +15,3 @@ __pycache__/
 
 # VSCode / otros
 .vscode/
-
-*.db3
-*.zip

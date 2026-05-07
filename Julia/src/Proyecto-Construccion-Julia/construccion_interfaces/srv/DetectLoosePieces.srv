@@ -1,0 +1,6 @@
+bool capture_background
+bool detect
+---
+bool success
+string message
+string json_result
