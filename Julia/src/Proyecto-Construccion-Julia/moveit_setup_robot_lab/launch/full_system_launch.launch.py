@@ -13,13 +13,18 @@ def generate_launch_description():
     camera_setup = ExecuteProcess(
         cmd=[
             'v4l2-ctl', '-d', '/dev/video2',
+            '-c', 'brightness=170',
+            '-c', 'contrast=140',
+            '-c', 'saturation=128',
+            '-c', 'sharpness=128',
             '-c', 'white_balance_automatic=0',
             '-c', 'focus_automatic_continuous=0',
-            '-c', 'focus_absolute=45',
-            '-c', 'white_balance_temperature=4652',
+            '-c', 'focus_absolute=35',
+            '-c', 'zoom_absolute=100',
+            '-c', 'white_balance_temperature=4408',
             '-c', 'auto_exposure=1',
-            '-c', 'exposure_time_absolute=250',
-            '-c', 'gain=2',
+            '-c', 'exposure_time_absolute=100',
+            '-c', 'gain=0',
             '-c', 'power_line_frequency=1'
         ],
         output='screen'
@@ -75,8 +80,8 @@ def generate_launch_description():
             output='screen',
             parameters=[
                 {'video_device': '/dev/video2'},
-                {'image_width': 1280},
-                {'image_height': 720},
+                {'image_width': 1920},
+                {'image_height': 1080},
             ]
         )
     calibration_node = Node(
@@ -94,7 +99,7 @@ def generate_launch_description():
                 PythonLaunchDescriptionSource(
                     [pkg, "/launch/moveit_rviz.launch.py"]
                 )
-            ), movimiento_julia, calibration_node
+            ), movimiento_julia, calibration_node, camera_setup,
         ]
     )
 
@@ -106,10 +111,9 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
+        camera,
         driver,
         delayed_controller,
         move_group,
         rviz,
-        #camera,
-        #camera_setup,
     ])

@@ -21,7 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             #'piece_detection_node = piece_detection_pkg.piece_detection_node:main',
-            'piece_detection_node = piece_detection_pkg.piece_detection_node_third:main',
+            'piece_detection_node = piece_detection_pkg.piece_detection_node_distance_peak:main',
             'tower_detection_node = piece_detection_pkg.tower_detection_phase_node:main'
         ],
     },

@@ -52,11 +52,19 @@ def approach_to_piece(piece_id: int, file: dict, Z: float):
     y_test = file["detections"][piece_id]["robot"]["y"]
     #xr, yr = transformar((x_test, y_test))
     xr, yr = (x_test, y_test)
+    angle = file["detections"][piece_id]["angle_deg"]
+    if angle <= -45:
+        angle += 90
+    yaw = 90 - angle
+    while yaw > 180:
+        yaw -= 360
+    while yaw < -180:
+        yaw += 360
     request_cartesian = MoveCartesian.Request()
-    request_cartesian.x = xr
-    request_cartesian.y = yr
+    request_cartesian.x = xr + 0.0028
+    request_cartesian.y = yr - 0.0069
     request_cartesian.z = Z
-    request_cartesian.yaw_deg = 90 - file["detections"][piece_id]["angle_deg"]
+    request_cartesian.yaw_deg = yaw
     request_cartesian.modo = "down"
     return request_cartesian
 

@@ -7,7 +7,11 @@ find_package(rosidl_default_generators REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/PixelToRobot.srv"
   "srv/RobotToPixel.srv"
+  "srv/MoveNamedPose.srv"
+  "srv/MoveCartesian.srv"
   "srv/DetectLoosePieces.srv"
+  "srv/GripperController.srv"
+  "srv/GrabPiece.srv"
 )
 
 ament_export_dependencies(rosidl_default_runtime)

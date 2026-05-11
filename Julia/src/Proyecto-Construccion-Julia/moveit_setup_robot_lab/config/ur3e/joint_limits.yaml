@@ -65,9 +65,9 @@ joint_limits:
     has_position_limits: true
     has_velocity_limits: true
     max_effort: 9.0
-    max_position: 6.2831853072
+    max_position: 3.49
     max_velocity: 6.2831853072
-    min_position: -6.2831853072
+    min_position: -0.0873
   wrist_3_joint:
     # acceleration limits are not publicly available
     has_acceleration_limits: false
@@ -75,6 +75,6 @@ joint_limits:
     has_position_limits: true
     has_velocity_limits: true
     max_effort: 9.0
-    max_position: 3.141592654
+    max_position: 2.44
     max_velocity: 6.2831853072
-    min_position: -3.141592654
+    min_position: -2.44
